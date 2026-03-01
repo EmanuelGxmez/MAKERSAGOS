@@ -1,296 +1,734 @@
-import React, { useState } from 'react';
-import { 
-  Cpu, 
-  Printer, 
-  Code, 
-  Wrench, 
-  Lightbulb, 
-  Zap, 
-  Menu, 
-  X, 
-  ChevronRight, 
-  Mail, 
-  MapPin, 
-  Phone 
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maker Sago</title>
+    <!-- Librería para los íconos (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- ==========================================
+         AQUÍ EMPIEZA TU CSS (Cópialo a style.css)
+         ========================================== -->
+    <style>
+        /* --- VARIABLES DE COLOR Y FUENTES --- */
+        :root {
+            --bg-dark: #0f172a;       /* slate-900 */
+            --bg-darker: #020617;     /* slate-950 */
+            --bg-card: #1e293b;       /* slate-800 */
+            --text-main: #f8fafc;     /* slate-50 */
+            --text-muted: #94a3b8;    /* slate-400 */
+            --primary: #06b6d4;       /* cyan-500 */
+            --primary-hover: #22d3ee; /* cyan-400 */
+            --secondary: #3b82f6;     /* blue-500 */
+            --border-color: #334155;  /* slate-700 */
+        }
 
-export default function App() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+        /* --- RESET BÁSICO --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+        }
 
-  // Lista de servicios de Maker Sago - ¡Fácil de editar para ti y tu amigo!
-  const services = [
-    {
-      icon: <Printer className="w-8 h-8 text-cyan-400" />,
-      title: "Impresión 3D y Modelado",
-      description: "Materializamos tus ideas. Desde piezas mecánicas hasta prototipos estéticos con alta precisión y diversos materiales."
-    },
-    {
-      icon: <Code className="w-8 h-8 text-cyan-400" />,
-      title: "Desarrollo de Software",
-      description: "Creamos aplicaciones web, móviles y sistemas a medida para optimizar los procesos de tu negocio."
-    },
-    {
-      icon: <Cpu className="w-8 h-8 text-cyan-400" />,
-      title: "Electrónica y Robótica",
-      description: "Diseño de circuitos, automatización y desarrollo de sistemas embebidos con Arduino, Raspberry Pi y más."
-    },
-    {
-      icon: <Wrench className="w-8 h-8 text-cyan-400" />,
-      title: "Prototipado Rápido",
-      description: "Iteramos rápidamente para convertir tu concepto en un producto funcional listo para pruebas de mercado."
-    },
-    {
-      icon: <Lightbulb className="w-8 h-8 text-cyan-400" />,
-      title: "Consultoría Tecnológica",
-      description: "Te asesoramos en la elección de la mejor tecnología y arquitectura para asegurar el éxito de tu proyecto."
-    },
-    {
-      icon: <Zap className="w-8 h-8 text-cyan-400" />,
-      title: "Corte y Grabado Láser",
-      description: "Cortes precisos y acabados profesionales en madera, acrílico y otros materiales para tus proyectos maker."
-    }
-  ];
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
 
-  return (
-    <div className="min-h-screen bg-slate-900 text-slate-50 font-sans selection:bg-cyan-500 selection:text-white">
-      
-      {/* NAVEGACIÓN */}
-      <nav className="fixed w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="bg-cyan-500 p-2 rounded-lg">
-                <Wrench className="w-6 h-6 text-slate-900" />
-              </div>
-              <span className="text-2xl font-bold tracking-wider">MAKER<span className="text-cyan-400">SAGO</span></span>
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* --- NAVEGACIÓN --- */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+        }
+
+        .logo-text-cyan {
+            color: var(--primary-hover);
+        }
+
+        .nav-links {
+            display: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-hover);
+        }
+
+        .nav-buttons {
+            display: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background-color: var(--bg-card);
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background-color: #334155;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .mobile-menu {
+            display: none;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+
+        .mobile-menu.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding: 180px 0 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, var(--primary-hover), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-text {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .hero-buttons .btn-primary, 
+        .hero-buttons .btn-outline {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* --- SERVICIOS --- */
+        .services {
+            padding: 100px 0;
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .title-line {
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary);
+            margin: 0 auto 1.5rem;
+            border-radius: 4px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .service-card {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s;
+        }
+
+        .service-card:hover {
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+
+        .service-icon {
+            background-color: var(--bg-dark);
+            width: 64px;
+            height: 64px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-hover);
+            transition: transform 0.3s;
+        }
+
+        .service-card:hover .service-icon {
+            transform: scale(1.1);
+        }
+
+        .service-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+        }
+
+        /* --- NOSOTROS --- */
+        .about {
+            padding: 100px 0;
+        }
+
+        .about-box {
+            background: linear-gradient(to right, rgba(8, 145, 178, 0.2), rgba(30, 58, 138, 0.2));
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p {
+            color: #cbd5e1;
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-list {
+            list-style: none;
+        }
+
+        .about-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .list-icon {
+            background-color: rgba(6, 182, 212, 0.2);
+            padding: 0.25rem;
+            border-radius: 50%;
+            color: var(--primary-hover);
+            display: flex;
+        }
+
+        .about-image {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 16/9;
+            color: var(--text-muted);
+            width: 100%;
+        }
+
+        /* --- CONTACTO --- */
+        .contact {
+            padding: 100px 0;
+            background-color: var(--bg-dark);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        .contact-form {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .info-icon {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            color: var(--primary-hover);
+        }
+
+        .info-text h4 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-text p {
+            color: var(--text-muted);
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            background-color: var(--bg-darker);
+            padding: 2.5rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-hover);
+        }
+
+        /* --- RESPONSIVE (Tabletas y Computadoras) --- */
+        @media (min-width: 768px) {
+            .nav-links, .nav-buttons {
+                display: flex;
+                align-items: center;
+            }
+            .mobile-menu-btn {
+                display: none;
+            }
+            .hero-title {
+                font-size: 4.5rem;
+            }
+            .hero-buttons {
+                flex-direction: row;
+            }
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .about-box {
+                flex-direction: row;
+                padding: 4rem;
+                align-items: center;
+            }
+            .about-text, .about-image {
+                flex: 1;
+            }
+            .footer-content {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: left;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .services-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .contact-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <!-- Logo -->
+            <div class="logo">
+                <div class="logo-icon">
+                    <i data-lucide="wrench"></i>
+                </div>
+                <span>MAKER<span class="logo-text-cyan">SAGO</span></span>
             </div>
 
-            {/* Menú Desktop */}
-            <div className="hidden md:flex space-x-8">
-              <a href="#inicio" className="text-slate-300 hover:text-cyan-400 transition-colors">Inicio</a>
-              <a href="#servicios" className="text-slate-300 hover:text-cyan-400 transition-colors">Servicios</a>
-              <a href="#nosotros" className="text-slate-300 hover:text-cyan-400 transition-colors">Nosotros</a>
-              <a href="#contacto" className="text-slate-300 hover:text-cyan-400 transition-colors">Contacto</a>
+            <!-- Menú Desktop -->
+            <div class="nav-links">
+                <a href="#inicio">Inicio</a>
+                <a href="#servicios">Servicios</a>
+                <a href="#nosotros">Nosotros</a>
+                <a href="#contacto">Contacto</a>
             </div>
 
-            {/* Botón CTA Desktop */}
-            <div className="hidden md:flex">
-              <a href="#contacto" className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold px-6 py-2 rounded-full transition-all transform hover:scale-105">
-                Cotizar Proyecto
-              </a>
+            <!-- Botón CTA Desktop -->
+            <div class="nav-buttons">
+                <a href="#contacto" class="btn-primary">Cotizar Proyecto</a>
             </div>
 
-            {/* Menú Móvil (Hamburguesa) */}
-            <div className="md:hidden flex items-center">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-300 hover:text-white">
-                {isMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-              </button>
-            </div>
-          </div>
+            <!-- Botón Hamburguesa Móvil -->
+            <button class="mobile-menu-btn" id="menu-btn">
+                <i data-lucide="menu" id="menu-icon"></i>
+            </button>
         </div>
 
-        {/* Dropdown Móvil */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-slate-800 border-b border-slate-700">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <a href="#inicio" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Inicio</a>
-              <a href="#servicios" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Servicios</a>
-              <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Nosotros</a>
-              <a href="#contacto" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Contacto</a>
-            </div>
-          </div>
-        )}
-      </nav>
+        <!-- Menú Móvil -->
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="#inicio" class="mobile-link">Inicio</a>
+            <a href="#servicios" class="mobile-link">Servicios</a>
+            <a href="#nosotros" class="mobile-link">Nosotros</a>
+            <a href="#contacto" class="mobile-link">Contacto</a>
+        </div>
+    </nav>
 
-      {/* SECCIÓN HERO (Inicio) */}
-      <section id="inicio" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Elementos decorativos de fondo */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-            Transformamos tus ideas en <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Realidad Tangible</span>
-          </h1>
-          <p className="mt-4 text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-10">
+    <!-- INICIO (HERO) -->
+    <section id="inicio" class="hero container">
+        <h1 class="hero-title">
+            Transformamos tus ideas en <br>
+            <span class="text-gradient">Realidad Tangible</span>
+        </h1>
+        <p class="hero-text">
             En Maker Sago combinamos ingeniería, desarrollo de software e impresión 3D para dar vida a tus proyectos más ambiciosos.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#servicios" className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-8 py-4 rounded-full flex items-center justify-center transition-all transform hover:scale-105">
-              Ver Nuestros Servicios
-              <ChevronRight className="ml-2 w-5 h-5" />
+        </p>
+        <div class="hero-buttons">
+            <a href="#servicios" class="btn-primary">
+                Ver Nuestros Servicios <i data-lucide="chevron-right" style="margin-left: 8px;"></i>
             </a>
-            <a href="#contacto" className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold px-8 py-4 rounded-full flex items-center justify-center transition-all">
-              Hablemos de tu proyecto
+            <a href="#contacto" class="btn-outline">
+                Hablemos de tu proyecto
             </a>
-          </div>
         </div>
-      </section>
+    </section>
 
-      {/* SECCIÓN SERVICIOS */}
-      <section id="servicios" className="py-20 bg-slate-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Lo que hacemos mejor</h2>
-            <div className="w-20 h-1 bg-cyan-500 mx-auto rounded-full mb-6"></div>
-            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-              Soluciones integrales de hardware y software diseñadas para innovadores, emprendedores y empresas.
+    <!-- SERVICIOS -->
+    <section id="servicios" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Lo que hacemos mejor</h2>
+                <div class="title-line"></div>
+                <p style="color: var(--text-muted); font-size: 1.125rem;">Soluciones integrales de hardware y software diseñadas para innovadores, emprendedores y empresas.</p>
+            </div>
+
+            <div class="services-grid">
+                <!-- Servicio 1 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="printer" width="32" height="32"></i></div>
+                    <h3>Impresión 3D y Modelado</h3>
+                    <p>Materializamos tus ideas. Desde piezas mecánicas hasta prototipos estéticos con alta precisión y diversos materiales.</p>
+                </div>
+                <!-- Servicio 2 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="code" width="32" height="32"></i></div>
+                    <h3>Desarrollo de Software</h3>
+                    <p>Creamos aplicaciones web, móviles y sistemas a medida para optimizar los procesos de tu negocio.</p>
+                </div>
+                <!-- Servicio 3 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="cpu" width="32" height="32"></i></div>
+                    <h3>Electrónica y Robótica</h3>
+                    <p>Diseño de circuitos, automatización y desarrollo de sistemas embebidos con Arduino, Raspberry Pi y más.</p>
+                </div>
+                <!-- Servicio 4 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="wrench" width="32" height="32"></i></div>
+                    <h3>Prototipado Rápido</h3>
+                    <p>Iteramos rápidamente para convertir tu concepto en un producto funcional listo para pruebas de mercado.</p>
+                </div>
+                <!-- Servicio 5 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="lightbulb" width="32" height="32"></i></div>
+                    <h3>Consultoría Tecnológica</h3>
+                    <p>Te asesoramos en la elección de la mejor tecnología y arquitectura para asegurar el éxito de tu proyecto.</p>
+                </div>
+                <!-- Servicio 6 -->
+                <div class="service-card">
+                    <div class="service-icon"><i data-lucide="zap" width="32" height="32"></i></div>
+                    <h3>Corte y Grabado Láser</h3>
+                    <p>Cortes precisos y acabados profesionales en madera, acrílico y otros materiales para tus proyectos maker.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOSOTROS -->
+    <section id="nosotros" class="about container">
+        <div class="about-box">
+            <div class="about-text">
+                <h2>El espíritu <span class="logo-text-cyan">Maker</span> en nuestro ADN</h2>
+                <p>Somos un equipo de ingenieros, desarrolladores y creadores apasionados por la tecnología. En Maker Sago no solo diseñamos; construimos, programamos, soldamos y probamos hasta que tu producto funciona a la perfección.</p>
+                <ul class="about-list">
+                    <li><div class="list-icon"><i data-lucide="chevron-right" width="16" height="16"></i></div> Metodologías Ágiles de Desarrollo</li>
+                    <li><div class="list-icon"><i data-lucide="chevron-right" width="16" height="16"></i></div> Laboratorio propio de pruebas</li>
+                    <li><div class="list-icon"><i data-lucide="chevron-right" width="16" height="16"></i></div> Atención personalizada</li>
+                </ul>
+            </div>
+            <div class="about-image">
+                <i data-lucide="cpu" width="64" height="64" style="opacity: 0.5; margin-bottom: 1rem;"></i>
+                <span>[Imagen de Taller Maker Sago]</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section id="contacto" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Inicia tu proyecto hoy</h2>
+                <div class="title-line"></div>
+                <p style="color: var(--text-muted); font-size: 1.125rem;">Déjanos un mensaje con tu idea o requerimiento y nos pondremos en contacto contigo a la brevedad.</p>
+            </div>
+
+            <div class="contact-grid">
+                <div class="contact-form">
+                    <form onsubmit="event.preventDefault();">
+                        <div class="form-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" placeholder="tucorreo@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Cuéntanos sobre tu proyecto</label>
+                            <textarea rows="4" placeholder="Necesito una app web y carcasas en 3D para..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary btn-submit">
+                            Enviar Mensaje <i data-lucide="chevron-right" style="margin-left: 8px;"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="contact-info">
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="mail"></i></div>
+                        <div class="info-text">
+                            <h4>Email</h4>
+                            <p>contacto@makersago.com</p>
+                            <p style="font-size: 0.875rem; margin-top: 0.25rem;">Respondemos en menos de 24 horas.</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="phone"></i></div>
+                        <div class="info-text">
+                            <h4>Teléfono</h4>
+                            <p>+51 987 654 321</p>
+                            <p style="font-size: 0.875rem; margin-top: 0.25rem;">Lunes a Viernes, 9am - 6pm</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="map-pin"></i></div>
+                        <div class="info-text">
+                            <h4>Laboratorio Maker</h4>
+                            <p>Av. Innovación 123, Edificio Tech<br>Lima, Perú</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="logo">
+                <i data-lucide="wrench" style="color: var(--primary);"></i>
+                <span style="font-size: 1.25rem; margin-left: 0.5rem;">MAKER<span class="logo-text-cyan">SAGO</span></span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">
+                &copy; 2026 Maker Sago. Todos los derechos reservados.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className="bg-slate-800 p-8 rounded-2xl border border-slate-700 hover:border-cyan-500/50 transition-colors group">
-                <div className="bg-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  {service.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-white">{service.title}</h3>
-                <p className="text-slate-400 leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN NOSOTROS / BANNER */}
-      <section id="nosotros" className="py-20 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border border-cyan-500/20 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-1">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">El espíritu <span className="text-cyan-400">Maker</span> en nuestro ADN</h2>
-              <p className="text-slate-300 text-lg mb-6 leading-relaxed">
-                Somos un equipo de ingenieros, desarrolladores y creadores apasionados por la tecnología. En Maker Sago no solo diseñamos; construimos, programamos, soldamos y probamos hasta que tu producto funciona a la perfección.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-center text-slate-300">
-                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
-                    <ChevronRight className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  Metodologías Ágiles de Desarrollo
-                </li>
-                <li className="flex items-center text-slate-300">
-                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
-                    <ChevronRight className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  Laboratorio propio de pruebas
-                </li>
-                <li className="flex items-center text-slate-300">
-                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
-                    <ChevronRight className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  Atención personalizada
-                </li>
-              </ul>
+            <div class="social-links">
+                <a href="#">LinkedIn</a>
+                <a href="#">Instagram</a>
+                <a href="#">GitHub</a>
             </div>
-            <div className="flex-1 w-full relative">
-              {/* Espacio para una imagen representativa del taller/oficina */}
-              <div className="aspect-video bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700 overflow-hidden relative group">
-                <div className="absolute inset-0 bg-cyan-500/10 group-hover:bg-cyan-500/0 transition-colors z-10"></div>
-                {/* Puedes reemplazar este div con una etiqueta <img> cuando tengas fotos de Maker Sago */}
-                <div className="text-slate-500 flex flex-col items-center">
-                  <Cpu className="w-16 h-16 mb-2 opacity-50" />
-                  <span>[Imagen de Taller Maker Sago]</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </section>
+    </footer>
 
-      {/* SECCIÓN CONTACTO */}
-      <section id="contacto" className="py-20 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Inicia tu proyecto hoy</h2>
-            <div className="w-20 h-1 bg-cyan-500 mx-auto rounded-full mb-6"></div>
-            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-              Déjanos un mensaje con tu idea o requerimiento y nos pondremos en contacto contigo a la brevedad.
-            </p>
-          </div>
+    <!-- ==========================================
+         AQUÍ EMPIEZA TU JAVASCRIPT
+         ========================================== -->
+    <script>
+        // Iniciar los íconos
+        lucide.createIcons();
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Formulario */}
-            <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700">
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Nombre Completo</label>
-                  <input type="text" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="Ej. Juan Pérez" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Correo Electrónico</label>
-                  <input type="email" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="tucorreo@ejemplo.com" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Cuéntanos sobre tu proyecto</label>
-                  <textarea rows="4" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="Necesito una app web y carcasas en 3D para..."></textarea>
-                </div>
-                <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center">
-                  Enviar Mensaje
-                  <ChevronRight className="ml-2 w-5 h-5" />
-                </button>
-              </form>
-            </div>
+        // Lógica para abrir y cerrar el menú en celulares
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
 
-            {/* Info de contacto */}
-            <div className="flex flex-col justify-center space-y-8">
-              <div className="flex items-start">
-                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
-                  <Mail className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold mb-1">Email</h4>
-                  <p className="text-slate-400">contacto@makersago.com</p>
-                  <p className="text-sm text-slate-500 mt-1">Respondemos en menos de 24 horas.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold mb-1">Teléfono</h4>
-                  <p className="text-slate-400">+51 987 654 321</p>
-                  <p className="text-sm text-slate-500 mt-1">Lunes a Viernes, 9am - 6pm</p>
-                </div>
-              </div>
+        let isMenuOpen = false;
 
-              <div className="flex items-start">
-                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
-                  <MapPin className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="text-xl font-bold mb-1">Laboratorio Maker</h4>
-                  <p className="text-slate-400">Av. Innovación 123, Edificio Tech<br/>Lima, Perú</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                mobileMenu.classList.add('active');
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                mobileMenu.classList.remove('active');
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons(); // Recargar el ícono nuevo
+        }
 
-      {/* FOOTER */}
-      <footer className="bg-slate-950 py-10 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Wrench className="w-5 h-5 text-cyan-500" />
-            <span className="text-xl font-bold tracking-wider text-slate-300">MAKER<span className="text-cyan-500">SAGO</span></span>
-          </div>
-          <p className="text-slate-500 text-sm text-center md:text-left">
-            &copy; {new Date().getFullYear()} Maker Sago. Todos los derechos reservados.
-          </p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            {/* Redes sociales placeholders */}
-            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">LinkedIn</a>
-            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">Instagram</a>
-            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">GitHub</a>
-          </div>
-        </div>
-      </footer>
+        menuBtn.addEventListener('click', toggleMenu);
 
-    </div>
-  );
-}
+        // Cerrar menú al hacer clic en un enlace
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if(isMenuOpen) toggleMenu();
+            });
+        });
+    </script>
+</body>
+</html>
