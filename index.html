@@ -1,200 +1,112 @@
-import { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKERSAGOS SAC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
 
-export default function MakersagosWeb() {
-  const whatsappNumber = "51987790681";
+<header class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-blue-700">MAKERSAGOS SAC</h1>
+  </div>
+</header>
 
-  // 🔹 CAMBIA SOLO ESTE EVENTO CUANDO TENGAS UNO NUEVO
-  const eventName = "CONGRESO NACIONAL DE AUTOMATIZACIÓN Y ROBÓTICA 2026";
-  const eventDate = "2026-11-20T18:00:00";
+<section class="bg-gradient-to-r from-blue-700 to-indigo-700 text-white py-20 text-center px-4">
+  <h2 class="text-4xl font-extrabold mb-4">Soluciones Tecnológicas & Educación Especializada</h2>
+  <p class="mb-6">Eventos académicos, desarrollo de software y plantillas premium.</p>
+  <button onclick="contactEvent()" class="bg-white text-blue-700 px-8 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition">
+    Información del Evento Actual
+  </button>
+</section>
 
-  // Eventos ficticios (referenciales)
-  const pastEvents = [
-    "Webinar Internacional de Inteligencia Artificial Aplicada",
-    "Seminario de Transformación Digital Empresarial",
-    "Congreso Latinoamericano de Ingeniería Mecatrónica",
-    "Workshop de Desarrollo Web Full Stack"
-  ];
+<section class="py-16 bg-gray-100 text-center px-4">
+  <h3 class="text-2xl font-bold mb-6">Eventos Realizados</h3>
+  <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    <div class="bg-white p-6 rounded-xl shadow">Webinar Internacional de Inteligencia Artificial Aplicada</div>
+    <div class="bg-white p-6 rounded-xl shadow">Seminario de Transformación Digital Empresarial</div>
+    <div class="bg-white p-6 rounded-xl shadow">Congreso Latinoamericano de Ingeniería Mecatrónica</div>
+    <div class="bg-white p-6 rounded-xl shadow">Workshop de Desarrollo Web Full Stack</div>
+  </div>
+</section>
 
-  const [timeLeft, setTimeLeft] = useState({});
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+<section class="py-16 text-center px-4">
+  <h3 class="text-2xl font-bold mb-6">Cuenta regresiva para <span id="eventName"></span></h3>
+  <div class="flex flex-wrap justify-center gap-6 text-xl font-semibold">
+    <div id="days">0d</div>
+    <div id="hours">0h</div>
+    <div id="minutes">0m</div>
+    <div id="seconds">0s</div>
+  </div>
+</section>
 
-  const templates = [
-    {
-      id: 1,
-      name: "Plantilla Corporativa PRO",
-      price: "S/ 450",
-      desc: "Diseño empresarial profesional con animaciones y formularios dinámicos.",
-      images: [
-        "https://picsum.photos/seed/corp1/600/400",
-        "https://picsum.photos/seed/corp2/600/400",
-        "https://picsum.photos/seed/corp3/600/400"
-      ]
-    },
-    {
-      id: 2,
-      name: "Plantilla Educativa Interactiva",
-      price: "S/ 380",
-      desc: "Ideal para cursos, academias, congresos y webinars.",
-      images: [
-        "https://picsum.photos/seed/edu1/600/400",
-        "https://picsum.photos/seed/edu2/600/400",
-        "https://picsum.photos/seed/edu3/600/400"
-      ]
-    },
-    {
-      id: 3,
-      name: "Plantilla E-commerce Tech",
-      price: "S/ 520",
-      desc: "Especializada en venta de productos digitales y tecnológicos.",
-      images: [
-        "https://picsum.photos/seed/shop1/600/400",
-        "https://picsum.photos/seed/shop2/600/400",
-        "https://picsum.photos/seed/shop3/600/400"
-      ]
-    }
-  ];
+<section class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <h3 class="text-3xl font-bold text-center mb-12">Plantillas Demo Interactivas</h3>
+    <div class="grid md:grid-cols-3 gap-10">
 
-  // Contador dinámico
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const difference = new Date(eventDate) - new Date();
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        });
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+      <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+        <h4 class="text-xl font-semibold mb-4 text-blue-700">Plantilla Corporativa PRO</h4>
+        <p class="mb-4">Diseño empresarial profesional con animaciones y formularios dinámicos.</p>
+        <p class="font-bold mb-6 text-lg">S/ 450</p>
+        <button onclick="buyTemplate('Plantilla Corporativa PRO','S/ 450')" class="bg-blue-700 text-white px-6 py-3 rounded-2xl">Comprar</button>
+      </div>
 
-  const handleTemplateBuy = (template) => {
-    const message = `Hola, quiero adquirir ${template.name} - Precio ${template.price}`;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
-  };
+      <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+        <h4 class="text-xl font-semibold mb-4 text-blue-700">Plantilla Educativa Interactiva</h4>
+        <p class="mb-4">Ideal para cursos, academias, congresos y webinars.</p>
+        <p class="font-bold mb-6 text-lg">S/ 380</p>
+        <button onclick="buyTemplate('Plantilla Educativa Interactiva','S/ 380')" class="bg-blue-700 text-white px-6 py-3 rounded-2xl">Comprar</button>
+      </div>
 
-  const handleEventClick = () => {
-    const message = `Hola, deseo información sobre el evento: ${eventName}`;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
-  };
-
-  const nextImage = () => {
-    setCarouselIndex((prev) => (prev + 1) % selectedTemplate.images.length);
-  };
-
-  const prevImage = () => {
-    setCarouselIndex((prev) =>
-      prev === 0 ? selectedTemplate.images.length - 1 : prev - 1
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-
-      {/* HEADER */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-700">MAKERSAGOS SAC</h1>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white py-20 text-center">
-        <h2 className="text-4xl font-extrabold mb-4">Soluciones Tecnológicas & Educación Especializada</h2>
-        <p className="mb-6">Eventos académicos, desarrollo de software y plantillas premium.</p>
-        <button
-          onClick={handleEventClick}
-          className="bg-white text-blue-700 px-8 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition"
-        >
-          Información del Evento Actual
-        </button>
-      </section>
-
-      {/* EVENTOS PASADOS */}
-      <section className="py-16 bg-gray-100 text-center">
-        <h3 className="text-2xl font-bold mb-6">Eventos Realizados</h3>
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {pastEvents.map((event, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl shadow">
-              {event}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CONTADOR */}
-      <section className="py-16 text-center">
-        <h3 className="text-2xl font-bold mb-6">Cuenta regresiva para {eventName}</h3>
-        <div className="flex justify-center gap-6 text-xl font-semibold">
-          <div>{timeLeft.days}d</div>
-          <div>{timeLeft.hours}h</div>
-          <div>{timeLeft.minutes}m</div>
-          <div>{timeLeft.seconds}s</div>
-        </div>
-      </section>
-
-      {/* PLANTILLAS */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h3 className="text-3xl font-bold text-center mb-12">Plantillas Demo Interactivas</h3>
-          <div className="grid md:grid-cols-3 gap-10">
-            {templates.map((template) => (
-              <div key={template.id} className="bg-white p-8 rounded-2xl shadow-lg text-center hover:shadow-2xl transition">
-                <h4 className="text-xl font-semibold mb-4 text-blue-700">{template.name}</h4>
-                <p className="mb-4">{template.desc}</p>
-                <p className="font-bold mb-6 text-lg">{template.price}</p>
-                <button
-                  onClick={() => handleTemplateBuy(template)}
-                  className="bg-blue-700 text-white px-6 py-3 rounded-2xl hover:bg-blue-800 transition"
-                >
-                  Comprar
-                </button>
-                <button
-                  onClick={() => { setSelectedTemplate(template); setCarouselIndex(0); }}
-                  className="block mt-4 text-blue-600 underline"
-                >
-                  Ver Demo
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MODAL CON CARRUSEL */}
-      {selectedTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-2xl max-w-2xl w-full text-center relative">
-            <h4 className="text-2xl font-bold mb-4">{selectedTemplate.name}</h4>
-            <img
-              src={selectedTemplate.images[carouselIndex]}
-              alt="demo"
-              className="w-full h-80 object-cover rounded-xl mb-4"
-            />
-            <div className="flex justify-between mb-4">
-              <button onClick={prevImage} className="px-4 py-2 bg-gray-200 rounded">Anterior</button>
-              <button onClick={nextImage} className="px-4 py-2 bg-gray-200 rounded">Siguiente</button>
-            </div>
-            <p className="font-bold mb-4">Precio: {selectedTemplate.price}</p>
-            <button
-              onClick={() => handleTemplateBuy(selectedTemplate)}
-              className="bg-green-600 text-white px-6 py-3 rounded-xl"
-            >Comprar Ahora</button>
-            <button
-              onClick={() => setSelectedTemplate(null)}
-              className="block mt-4 text-red-600"
-            >Cerrar</button>
-          </div>
-        </div>
-      )}
-
-      <footer className="bg-gray-900 text-gray-400 py-6 text-center">
-        © {new Date().getFullYear()} MAKERSAGOS SAC - Tecnología & Educación
-      </footer>
+      <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+        <h4 class="text-xl font-semibold mb-4 text-blue-700">Plantilla E-commerce Tech</h4>
+        <p class="mb-4">Especializada en venta de productos digitales y tecnológicos.</p>
+        <p class="font-bold mb-6 text-lg">S/ 520</p>
+        <button onclick="buyTemplate('Plantilla E-commerce Tech','S/ 520')" class="bg-blue-700 text-white px-6 py-3 rounded-2xl">Comprar</button>
+      </div>
 
     </div>
-  );
-}
+  </div>
+</section>
+
+<footer class="bg-gray-900 text-gray-400 py-6 text-center">
+  © <span id="year"></span> MAKERSAGOS SAC - Tecnología & Educación
+</footer>
+
+<script>
+  const whatsappNumber = "51987790681";
+  const eventName = "CONGRESO NACIONAL DE AUTOMATIZACIÓN Y ROBÓTICA 2026"; // 🔹 CAMBIA SOLO ESTO
+  const eventDate = "2026-11-20T18:00:00";
+
+  document.getElementById("eventName").innerText = eventName;
+  document.getElementById("year").innerText = new Date().getFullYear();
+
+  function contactEvent(){
+    const message = `Hola, deseo información sobre el evento: ${eventName}`;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  }
+
+  function buyTemplate(name, price){
+    const message = `Hola, quiero adquirir ${name} - Precio ${price}`;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  }
+
+  function updateCountdown(){
+    const diff = new Date(eventDate).getTime() - new Date().getTime();
+    if(diff > 0){
+      document.getElementById("days").innerText = Math.floor(diff / (1000*60*60*24)) + "d";
+      document.getElementById("hours").innerText = Math.floor((diff / (1000*60*60)) % 24) + "h";
+      document.getElementById("minutes").innerText = Math.floor((diff / 1000/60) % 60) + "m";
+      document.getElementById("seconds").innerText = Math.floor((diff / 1000) % 60) + "s";
+    }
+  }
+
+  setInterval(updateCountdown,1000);
+  updateCountdown();
+</script>
+
+</body>
+</html>
