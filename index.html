@@ -3,38 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maker Sago - Innovación Maker</title>
-    <!-- Librería para los íconos (Lucide) -->
+    <title>Maker Sago | Ingeniería, Software e Innovación</title>
+    
+    <!-- Librerías Externas -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Configuración Firebase (Persistencia de Datos) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Globales del entorno
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'maker-sago-prod';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Sistema de autenticación previa a cualquier operación (Regla 3)
+        async function authenticate() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+            }
+        }
+        authenticate();
+
+        // Función global para guardar inscripciones
+        window.processInscription = async (data) => {
+            if (!auth.currentUser) return { success: false, msg: "No autenticado" };
+            
+            try {
+                // Ruta estricta (Regla 1)
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'inscripciones');
+                await addDoc(path, {
+                    ...data,
+                    timestamp: serverTimestamp(),
+                    status: 'pendiente'
+                });
+                return { success: true };
+            } catch (e) {
+                console.error("Firestore Error:", e);
+                return { success: false, msg: e.message };
+            }
+        };
+    </script>
+
     <style>
-        /* --- VARIABLES DE COLOR --- */
+        /* --- DISEÑO DE SISTEMA (CSS VARIABLES) --- */
         :root {
-            --bg-dark: #0f172a;
-            --bg-darker: #020617;
-            --bg-card: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #06b6d4;
-            --primary-hover: #22d3ee;
-            --secondary: #3b82f6;
-            --whatsapp: #25d366;
-            --border-color: #334155;
+            --primary: #06b6d4;      /* Cian Maker */
+            --primary-dark: #0891b2;
+            --accent: #3b82f6;       /* Azul Tech */
+            --bg-main: #020617;      /* Slate 950 */
+            --bg-card: #0f172a;      /* Slate 900 */
+            --bg-input: #1e293b;     /* Slate 800 */
+            --text-white: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #22c55e;
+            --border: rgba(51, 65, 85, 0.5);
+            --glass: rgba(15, 23, 42, 0.8);
         }
 
-        /* --- RESET --- */
+        /* --- RESET Y BASE --- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            scroll-behavior: smooth;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            overflow-x: hidden;
+            background-color: var(--bg-main);
+            color: var(--text-white);
+            line-height: 1.6;
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -44,42 +94,48 @@
         }
 
         /* --- NAVEGACIÓN --- */
-        .navbar {
+        nav {
             position: fixed;
-            width: 100%;
             top: 0;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            z-index: 1000;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            height: 75px;
+            display: flex;
+            align-items: center;
         }
 
-        .nav-content {
+        .nav-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 70px;
+            width: 100%;
         }
 
         .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.4rem;
-            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
         }
 
-        .logo i { color: var(--primary); }
+        .logo span { color: var(--primary); }
 
         .nav-links {
             display: none;
-            gap: 20px;
+            gap: 2rem;
         }
 
         .nav-links a {
-            color: var(--text-muted);
+            color: var(--text-dim);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 500;
             transition: color 0.3s;
         }
 
@@ -87,110 +143,157 @@
 
         /* --- BOTONES --- */
         .btn {
-            padding: 10px 20px;
-            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             gap: 8px;
             border: none;
             text-decoration: none;
+            font-size: 0.95rem;
         }
 
-        .btn-primary { background: var(--primary); color: var(--bg-dark); }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-primary { background: var(--primary); color: var(--bg-main); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4); }
 
-        .btn-whatsapp { background: var(--whatsapp); color: white; margin-top: 10px; width: 100%; justify-content: center; }
-        .btn-whatsapp:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--bg-card); border-color: var(--primary); }
 
-        /* --- SECCIÓN HERO --- */
+        /* --- HERO --- */
         .hero {
-            padding: 150px 0 80px;
+            padding: 160px 0 100px;
             text-align: center;
+            background: radial-gradient(circle at 50% -20%, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
         }
 
-        .hero h1 { font-size: 3.5rem; margin-bottom: 20px; }
-        .hero span { color: var(--primary); }
-        .hero p { color: var(--text-muted); font-size: 1.2rem; max-width: 700px; margin: 0 auto 30px; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; font-weight: 900; }
+        .hero p { font-size: 1.25rem; color: var(--text-dim); max-width: 700px; margin: 0 auto 2.5rem; }
 
-        /* --- SECCIÓN PLANTILLAS (FILTRADO CON JS) --- */
-        .filter-container {
+        /* --- SECCIÓN PLANTILLAS (FILTRADO) --- */
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        
+        .filter-bar {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 3rem;
             flex-wrap: wrap;
         }
 
-        .filter-btn {
+        .filter-item {
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
             background: var(--bg-card);
-            color: white;
-            padding: 8px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
             cursor: pointer;
             transition: 0.3s;
         }
 
-        .filter-btn.active, .filter-btn:hover {
-            background: var(--primary);
-            color: var(--bg-dark);
-            border-color: var(--primary);
-        }
+        .filter-item.active { background: var(--primary); color: var(--bg-main); border-color: var(--primary); font-weight: bold; }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
         }
 
         .card {
             background: var(--bg-card);
-            border-radius: 15px;
-            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            border: 1px solid var(--border);
             overflow: hidden;
-            transition: 0.3s;
+            transition: all 0.4s;
             display: flex;
             flex-direction: column;
         }
 
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
 
         .card-img {
-            height: 180px;
-            background: var(--bg-darker);
-            display: flex;
+            height: 220px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; opacity: 0.8; }
+        .card:hover .card-img img { transform: scale(1.1); opacity: 1; }
+
+        .card-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(6, 182, 212, 0.9);
+            color: var(--bg-main);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .card-body { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-body h3 { font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--primary); }
+        .card-body p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
+        
+        .card-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 1rem; }
+        .price-tag { font-size: 1.5rem; font-weight: 800; }
+
+        /* --- MODAL --- */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+            padding: 1rem;
         }
 
-        .card-body { padding: 20px; flex-grow: 1; }
-        .card-body h3 { margin-bottom: 10px; color: var(--primary); }
-        .card-body p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
 
-        .price { font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; display: block; }
-
-        /* --- CONTACTO --- */
-        .contact-section { padding: 80px 0; background: var(--bg-darker); }
-        .contact-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-        }
-
-        .info-box {
+        .modal-box {
             background: var(--bg-card);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
         }
 
-        .info-box i { color: var(--primary); font-size: 2rem; margin-bottom: 15px; }
+        .close-modal { position: absolute; top: 1.5rem; right: 1.5rem; cursor: pointer; color: var(--text-dim); }
 
-        /* --- RESPONSIVE --- */
+        .form-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 1.25rem;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .form-input:focus { border-color: var(--primary); }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 5rem 0 2rem;
+            background: var(--bg-darker);
+            border-top: 1px solid var(--border);
+            margin-top: 5rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         @media (min-width: 768px) {
             .nav-links { display: flex; }
         }
@@ -198,193 +301,282 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="container nav-content">
+    <!-- NAVEGACIÓN -->
+    <nav>
+        <div class="container nav-inner">
             <div class="logo">
-                <i data-lucide="wrench"></i> MAKER<span>SAGO</span>
+                <i data-lucide="blocks"></i> Maker<span>Sago</span>
             </div>
             <div class="nav-links">
                 <a href="#inicio">Inicio</a>
-                <a href="#plantillas">Plantillas</a>
+                <a href="#plantillas">Software</a>
+                <a href="#conferencias">Eventos</a>
                 <a href="#asesorias">Asesorías</a>
-                <a href="#contacto">Contacto</a>
             </div>
-            <a href="#contacto" class="btn btn-primary">Hablemos</a>
+            <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20necesito%20una%20consultoría." target="_blank" class="btn btn-primary">
+                WhatsApp Directo
+            </a>
         </div>
     </nav>
 
+    <!-- HERO -->
     <header id="inicio" class="hero container">
-        <h1>Diseño y Código para tu <span>Negocio</span></h1>
-        <p>Expertos en convertir necesidades complejas en soluciones digitales elegantes. Mira nuestras plantillas listas para usar.</p>
-        <div class="hero-btns">
-            <a href="#plantillas" class="btn btn-primary">Ver Catálogo</a>
+        <h1>Ingeniería para el <span style="color: var(--primary);">Futuro Digital</span></h1>
+        <p>Expertos en impresión 3D, desarrollo de software a medida y mentoría tecnológica. Construimos la solución que tu negocio necesita hoy.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="#plantillas" class="btn btn-primary">Explorar Plantillas</a>
+            <a href="#conferencias" class="btn btn-outline">Próximos Eventos</a>
         </div>
     </header>
 
-    <!-- SECCIÓN PLANTILLAS -->
-    <section id="plantillas" class="container" style="padding: 60px 0;">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h2>Nuestras Plantillas de Software</h2>
-            <p style="color: var(--text-muted);">Elige tu rubro e impleméntalo hoy mismo.</p>
+    <!-- SECCIÓN SOFTWARE / PLANTILLAS -->
+    <section id="plantillas" class="container" style="padding: 80px 0;">
+        <div class="section-header">
+            <h2>Plantillas de Software</h2>
+            <p style="color: var(--text-dim);">Código funcional, limpio y listo para ser implementado en tu rubro.</p>
         </div>
 
-        <div class="filter-container">
-            <button class="filter-btn active" onclick="filterItems('todo')">Todo</button>
-            <button class="filter-btn" onclick="filterItems('restaurantes')">Restaurantes</button>
-            <button class="filter-btn" onclick="filterItems('tiendas')">E-commerce</button>
-            <button class="filter-btn" onclick="filterItems('salud')">Salud y Fitness</button>
-            <button class="filter-btn" onclick="filterItems('otros')">Otros</button>
+        <div class="filter-bar" id="category-filters">
+            <div class="filter-item active" onclick="filterData('todo')">Todas</div>
+            <div class="filter-item" onclick="filterData('restaurante')">Restaurantes</div>
+            <div class="filter-item" onclick="filterData('tienda')">Tiendas</div>
+            <div class="filter-item" onclick="filterData('salud')">Salud</div>
+            <div class="filter-item" onclick="filterData('otros')">Otros</div>
         </div>
 
-        <div class="grid" id="plantillas-grid">
-            <!-- Los items se cargan por JavaScript -->
+        <div class="grid" id="software-grid">
+            <!-- Dinámico por JS -->
+        </div>
+    </section>
+
+    <!-- SECCIÓN CONFERENCIAS -->
+    <section id="conferencias" class="container" style="padding: 80px 0; background: rgba(6, 182, 212, 0.03); border-radius: 40px;">
+        <div class="section-header">
+            <h2>Conferencias y Congresos</h2>
+            <p style="color: var(--text-dim);">Únete a nuestras sesiones de capacitación y mejora tus habilidades técnicas.</p>
+        </div>
+
+        <div class="grid" id="events-grid">
+            <!-- Evento 1 -->
+            <div class="card">
+                <div class="card-img">
+                    <img src="https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop" alt="Banner Congreso">
+                    <span class="card-tag">Evento Presencial</span>
+                </div>
+                <div class="card-body">
+                    <h3>Congreso Maker Perú 2026</h3>
+                    <p>Hablaremos sobre el impacto de la impresión 3D industrial en el mercado local y automatización con PLC.</p>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" onclick="openEnrollModal('Congreso Maker Perú 2026')">
+                            Inscribirme Ahora
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evento 2 -->
+            <div class="card">
+                <div class="card-img">
+                    <img src="https://images.unsplash.com/photo-1591115765373-520b7a217294?q=80&w=2070&auto=format&fit=crop" alt="Banner IA">
+                    <span class="card-tag">Online</span>
+                </div>
+                <div class="card-body">
+                    <h3>Masterclass: IA aplicada al Código</h3>
+                    <p>Aprende a integrar APIs de lenguaje en tus aplicaciones web de forma profesional.</p>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" onclick="openEnrollModal('Masterclass IA 2026')">
+                            Inscribirme Ahora
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- SECCIÓN ASESORÍAS -->
-    <section id="asesorias" class="container" style="padding: 80px 0; border-top: 1px solid var(--border-color);">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2>Asesorías y Conferencias</h2>
-            <p style="color: var(--text-muted);">Capacitación técnica para equipos y charlas inspiradoras sobre tecnología maker.</p>
-        </div>
+    <section id="asesorias" class="container" style="padding: 100px 0;">
         <div class="grid">
-            <div class="card" style="padding: 30px; text-align: center;">
-                <i data-lucide="presentation" style="width: 50px; height: 50px; margin: 0 auto 15px; color: var(--primary);"></i>
-                <h3>Charlas de Innovación</h3>
-                <p>Conferencias sobre el futuro de la impresión 3D y la automatización en Perú.</p>
-                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20deseo%20información%20sobre%20tus%20conferencias." class="btn btn-whatsapp">Consultar Fecha</a>
+            <div style="padding: 2rem;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Asesorías <span style="color: var(--primary);">Personalizadas</span></h2>
+                <p style="color: var(--text-dim); margin-bottom: 2rem;">¿Tienes un proyecto de grado, una startup o una duda técnica puntual? Ofrecemos sesiones 1-a-1 para resolver problemas de arquitectura, programación o hardware.</p>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;">
+                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Revisión de Código y Bug Hunting</li>
+                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Optimización de procesos de Impresión 3D</li>
+                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Planificación de Proyectos de Ingeniería</li>
+                </ul>
+                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20me%20gustaría%20agendar%20una%20asesoría." class="btn btn-outline">Solicitar Mentoría</a>
             </div>
-            <div class="card" style="padding: 30px; text-align: center;">
-                <i data-lucide="graduation-cap" style="width: 50px; height: 50px; margin: 0 auto 15px; color: var(--primary);"></i>
-                <h3>Asesoría 1 a 1</h3>
-                <p>Mentoría personalizada para programadores o dueños de negocios tech.</p>
-                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20me%20gustaría%20agendar%20una%20asesoría%20contigo." class="btn btn-whatsapp">Agendar Sesión</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN CONTACTO -->
-    <section id="contacto" class="contact-section">
-        <div class="container">
-            <div style="text-align: center; margin-bottom: 50px;">
-                <h2>¿Tienes un proyecto especial?</h2>
-                <p style="color: var(--text-muted);">Escríbeme directamente por WhatsApp para una atención rápida.</p>
-            </div>
-            <div class="contact-container">
-                <div class="info-box">
-                    <i data-lucide="smartphone"></i>
-                    <h3>WhatsApp Directo</h3>
-                    <p>Atención inmediata para presupuestos.</p>
-                    <!-- CAMBIA EL NÚMERO AQUÍ -->
-                    <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20vengo%20de%20tu%20página%20web%20y%20necesito%20cotizar%20un%20proyecto." class="btn btn-whatsapp">
-                        <i data-lucide="message-circle"></i> Chatear Ahora
-                    </a>
-                </div>
-                <div class="info-box">
-                    <i data-lucide="mail"></i>
-                    <h3>Email</h3>
-                    <p>contacto@makersago.com</p>
-                </div>
+            <div style="background: var(--bg-card); border-radius: 30px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                 <i data-lucide="cpu" style="width: 150px; height: 150px; color: var(--primary); opacity: 0.2; position: absolute; top: -20px; right: -20px;"></i>
+                 <div style="text-align: center; z-index: 1; padding: 3rem;">
+                    <i data-lucide="users" style="width: 60px; height: 60px; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <h3 style="font-size: 1.5rem;">Mentoría Senior</h3>
+                    <p style="color: var(--text-dim);">Más de 50 proyectos exitosos asesorados.</p>
+                 </div>
             </div>
         </div>
     </section>
 
-    <footer style="padding: 40px 0; text-align: center; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-muted);">
-        <p>&copy; 2026 Maker Sago. Desarrollado con ❤️ en Perú.</p>
+    <!-- MODAL DE INSCRIPCIÓN -->
+    <div id="enrollModal" class="modal">
+        <div class="modal-box">
+            <i data-lucide="x" class="close-modal" onclick="closeEnrollModal()"></i>
+            <h2 style="margin-bottom: 0.5rem;">Registro de Evento</h2>
+            <p id="modalEventName" style="color: var(--primary); font-weight: bold; margin-bottom: 2rem;">Nombre del Evento</p>
+            
+            <form id="enrollForm">
+                <input type="text" id="formName" class="form-input" placeholder="Tu Nombre Completo" required>
+                <input type="tel" id="formPhone" class="form-input" placeholder="WhatsApp (Ej: 987654321)" required>
+                <input type="email" id="formEmail" class="form-input" placeholder="Tu Correo Electrónico" required>
+                
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+                    Confirmar y Unirme al Grupo
+                </button>
+            </form>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-top: 1.5rem;">
+                Al registrarte, te redirigiremos a nuestro grupo oficial de WhatsApp.
+            </p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+            <div class="logo">
+                <i data-lucide="blocks"></i> Maker<span>Sago</span>
+            </div>
+            <div style="display: flex; gap: 1.5rem;">
+                <a href="#" class="nav-links">GitHub</a>
+                <a href="#" class="nav-links">Instagram</a>
+                <a href="#" class="nav-links">LinkedIn</a>
+            </div>
+            <p style="color: var(--text-dim); font-size: 0.9rem; width: 100%; text-align: center; margin-top: 2rem;">
+                &copy; 2026 Maker Sago | Hecho por Makers para Makers. Lima, Perú.
+            </p>
+        </div>
     </footer>
 
+    <!-- JAVASCRIPT DE LÓGICA -->
     <script>
-        // Iniciar íconos
+        // Inicializar Lucide
         lucide.createIcons();
 
-        // Datos de las plantillas (Rubros)
-        const plantillas = [
+        // Base de Datos de Software
+        const softwareData = [
             {
-                titulo: "Menú Digital Pro",
-                rubro: "restaurantes",
-                descripcion: "Sistema de QR con gestión de pedidos y carrito de compras para restaurantes.",
-                precio: "S/ 150",
-                icon: "utensils"
+                id: 1,
+                cat: 'restaurante',
+                title: 'Menú Digital Smart',
+                desc: 'Web App con código QR, gestión de categorías e integración con pedidos de WhatsApp.',
+                price: 'S/ 180',
+                img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop'
             },
             {
-                titulo: "E-commerce Calzado/Ropa",
-                rubro: "tiendas",
-                descripcion: "Tienda online con pasarela de pagos y panel de administración de stock.",
-                precio: "S/ 350",
-                icon: "shopping-bag"
+                id: 2,
+                cat: 'tienda',
+                title: 'E-commerce Minimalista',
+                desc: 'Tienda lista para catálogos de ropa o tecnología con panel de administración simple.',
+                price: 'S/ 320',
+                img: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2070&auto=format&fit=crop'
             },
             {
-                titulo: "Gestión de Gimnasios",
-                rubro: "salud",
-                descripcion: "Control de membresías, rutinas y asistencia para boxes de CrossFit o Gimnasios.",
-                precio: "S/ 280",
-                icon: "dumbbell"
+                id: 3,
+                cat: 'salud',
+                title: 'Agenda de Citas Pro',
+                desc: 'Sistema para salones de belleza o dentistas. Organización por horas y recordatorios.',
+                price: 'S/ 250',
+                img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=2070&auto=format&fit=crop'
             },
             {
-                titulo: "Booking para Salones",
-                rubro: "salud",
-                descripcion: "Agenda de citas online para peluquerías, spas o consultorios médicos.",
-                precio: "S/ 200",
-                icon: "calendar"
-            },
-            {
-                titulo: "Catálogo Inmobiliario",
-                rubro: "otros",
-                descripcion: "Muestra tus propiedades con filtros avanzados y contacto directo.",
-                precio: "S/ 320",
-                icon: "home"
-            },
-            {
-                titulo: "Portafolio Creativo",
-                rubro: "otros",
-                descripcion: "Ideal para diseñadores o fotógrafos que buscan elegancia.",
-                precio: "S/ 120",
-                icon: "palette"
+                id: 4,
+                cat: 'otros',
+                title: 'Landing Page Corporativa',
+                desc: 'Diseño de alto impacto para agencias o consultoras. SEO optimizado.',
+                price: 'S/ 150',
+                img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop'
             }
         ];
 
-        function filterItems(category) {
-            // Actualizar botones de filtro sin usar el objeto 'event' global que causaba error en onload
-            const buttons = document.querySelectorAll('.filter-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('active');
-                // Si el botón corresponde a la categoría seleccionada, le añadimos la clase active
-                if (btn.getAttribute('onclick').includes(`'${category}'`)) {
-                    btn.classList.add('active');
-                }
-            });
-
-            const grid = document.getElementById('plantillas-grid');
-            if (!grid) return;
+        // Lógica de Filtrado
+        function filterData(category) {
+            const grid = document.getElementById('software-grid');
+            const filters = document.querySelectorAll('.filter-item');
             
-            grid.innerHTML = ''; // Limpiar grid
+            // UI Update
+            filters.forEach(f => f.classList.remove('active'));
+            event.target.classList.add('active');
 
-            const filtered = category === 'todo' ? plantillas : plantillas.filter(p => p.rubro === category);
+            grid.innerHTML = '';
+            
+            const filtered = category === 'todo' ? softwareData : softwareData.filter(s => s.cat === category);
 
-            filtered.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-img">
-                        <i data-lucide="${p.icon}" width="60" height="60"></i>
-                    </div>
-                    <div class="card-body">
-                        <h3>${p.titulo}</h3>
-                        <p>${p.descripcion}</p>
-                        <span class="price">${p.precio}</span>
-                        <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20estoy%20interesado%20en%20la%20plantilla:%20${encodeURIComponent(p.titulo)}" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                            Comprar Código
-                        </a>
+            filtered.forEach(item => {
+                grid.innerHTML += `
+                    <div class="card">
+                        <div class="card-img">
+                            <img src="${item.img}" alt="${item.title}">
+                            <span class="card-tag">${item.cat.toUpperCase()}</span>
+                        </div>
+                        <div class="card-body">
+                            <h3>${item.title}</h3>
+                            <p>${item.desc}</p>
+                            <div class="card-footer">
+                                <span class="price-tag">${item.price}</span>
+                                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20me%20interesa%20comprar%20la%20plantilla:%20${item.title}" class="btn btn-outline">Ver Demo</a>
+                            </div>
+                        </div>
                     </div>
                 `;
-                grid.appendChild(card);
             });
-            lucide.createIcons(); // Recargar íconos para los nuevos elementos
+            lucide.createIcons();
         }
 
-        // Cargar todo al inicio esperando a que el DOM esté listo
+        // Lógica del Modal e Inscripción
+        const modal = document.getElementById('enrollModal');
+        const modalEventName = document.getElementById('modalEventName');
+        const enrollForm = document.getElementById('enrollForm');
+        const WHATSAPP_GROUP = "https://chat.whatsapp.com/LKC3qE0oKOlC4tnt48VY3K";
+
+        function openEnrollModal(name) {
+            modalEventName.innerText = name;
+            modal.classList.add('active');
+        }
+
+        function closeEnrollModal() {
+            modal.classList.remove('active');
+        }
+
+        enrollForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Guardando Datos...";
+            btn.disabled = true;
+
+            const userData = {
+                evento: modalEventName.innerText,
+                nombre: document.getElementById('formName').value,
+                whatsapp: document.getElementById('formPhone').value,
+                email: document.getElementById('formEmail').value
+            };
+
+            const result = await window.processInscription(userData);
+
+            if (result.success) {
+                // Redirigir al grupo
+                window.location.href = WHATSAPP_GROUP;
+            } else {
+                alert("Ocurrió un error: " + result.msg);
+                btn.innerText = "Confirmar e Inscribirme";
+                btn.disabled = false;
+            }
+        };
+
+        // Cerrar modal al clickear fuera
+        window.onclick = (e) => { if (e.target == modal) closeEnrollModal(); };
+
+        // Carga inicial
         window.onload = () => {
-            filterItems('todo');
+            filterData('todo');
         };
     </script>
 </body>
