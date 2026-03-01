@@ -1,453 +1,200 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maker Sago | Ingeniería, Software & Electrónica</title>
-    
-    <!-- Librerías de Estilo e Íconos -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { useState, useEffect } from "react";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'maker-sago-v2';
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+export default function MakersagosWeb() {
+  const whatsappNumber = "51987790681";
 
-        async function startSession() {
-            try {
-                await signInAnonymously(auth);
-            } catch (err) { console.error("Error de Sesión:", err); }
-        }
-        startSession();
+  // 🔹 CAMBIA SOLO ESTE EVENTO CUANDO TENGAS UNO NUEVO
+  const eventName = "CONGRESO NACIONAL DE AUTOMATIZACIÓN Y ROBÓTICA 2026";
+  const eventDate = "2026-11-20T18:00:00";
 
-        window.saveLead = async (collectionName, data) => {
-            if (!auth.currentUser) return { success: false };
-            try {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
-                await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-                return { success: true };
-            } catch (e) { return { success: false, error: e.message }; }
-        };
-    </script>
+  // Eventos ficticios (referenciales)
+  const pastEvents = [
+    "Webinar Internacional de Inteligencia Artificial Aplicada",
+    "Seminario de Transformación Digital Empresarial",
+    "Congreso Latinoamericano de Ingeniería Mecatrónica",
+    "Workshop de Desarrollo Web Full Stack"
+  ];
 
-    <style>
-        :root {
-            --primary: #06b6d4;
-            --primary-glow: rgba(6, 182, 212, 0.4);
-            --secondary: #6366f1;
-            --bg-deep: #020617;
-            --bg-surface: #0f172a;
-            --bg-elevated: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.08);
-            --whatsapp: #25d366;
-            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        }
+  const [timeLeft, setTimeLeft] = useState({});
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        html { scroll-behavior: smooth; }
-        body { background-color: var(--bg-deep); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
-        
-        /* UTILIDADES */
-        .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
-        .text-gradient { background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--border); }
+  const templates = [
+    {
+      id: 1,
+      name: "Plantilla Corporativa PRO",
+      price: "S/ 450",
+      desc: "Diseño empresarial profesional con animaciones y formularios dinámicos.",
+      images: [
+        "https://picsum.photos/seed/corp1/600/400",
+        "https://picsum.photos/seed/corp2/600/400",
+        "https://picsum.photos/seed/corp3/600/400"
+      ]
+    },
+    {
+      id: 2,
+      name: "Plantilla Educativa Interactiva",
+      price: "S/ 380",
+      desc: "Ideal para cursos, academias, congresos y webinars.",
+      images: [
+        "https://picsum.photos/seed/edu1/600/400",
+        "https://picsum.photos/seed/edu2/600/400",
+        "https://picsum.photos/seed/edu3/600/400"
+      ]
+    },
+    {
+      id: 3,
+      name: "Plantilla E-commerce Tech",
+      price: "S/ 520",
+      desc: "Especializada en venta de productos digitales y tecnológicos.",
+      images: [
+        "https://picsum.photos/seed/shop1/600/400",
+        "https://picsum.photos/seed/shop2/600/400",
+        "https://picsum.photos/seed/shop3/600/400"
+      ]
+    }
+  ];
 
-        /* NAVEGACIÓN */
-        nav { position: fixed; top: 0; width: 100%; z-index: 1000; height: 80px; display: flex; align-items: center; transition: 0.3s; }
-        nav.scrolled { background: var(--bg-deep); border-bottom: 1px solid var(--border); }
-        .nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .logo { font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
-        .logo span { color: var(--primary); }
+  // Contador dinámico
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const difference = new Date(eventDate) - new Date();
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-        .nav-links { display: none; gap: 2rem; }
-        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
+  const handleTemplateBuy = (template) => {
+    const message = `Hola, quiero adquirir ${template.name} - Precio ${template.price}`;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+  };
 
-        /* HERO */
-        .hero { padding: 160px 0 80px; text-align: center; position: relative; }
-        .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -2px; }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 750px; margin: 0 auto 2.5rem; }
+  const handleEventClick = () => {
+    const message = `Hola, deseo información sobre el evento: ${eventName}`;
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+  };
 
-        /* BOTONES */
-        .btn { padding: 0.8rem 1.8rem; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border: none; }
-        .btn-primary { background: var(--primary); color: var(--bg-deep); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
-        .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); }
+  const nextImage = () => {
+    setCarouselIndex((prev) => (prev + 1) % selectedTemplate.images.length);
+  };
 
-        /* SECCIONES */
-        .section-header { text-align: center; margin-bottom: 4rem; }
-        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
-        
-        /* GRID DE PRODUCTOS / CARDS */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
-        .card { background: var(--bg-surface); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; transition: 0.4s; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: var(--card-shadow); }
-        
-        .card-img { height: 200px; background: #000; position: relative; overflow: hidden; }
-        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; opacity: 0.8; }
-        .card:hover .card-img img { opacity: 1; transform: scale(1.1); }
-        
-        .card-body { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-body h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: white; }
-        .card-body p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; flex-grow: 1; }
-        
-        .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid var(--border); }
-        .price { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+  const prevImage = () => {
+    setCarouselIndex((prev) =>
+      prev === 0 ? selectedTemplate.images.length - 1 : prev - 1
+    );
+  };
 
-        /* MODALES */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 1rem; }
-        .modal.active { display: flex; }
-        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 24px; width: 100%; max-width: 1000px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .modal-header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: 1fr; }
-        @media (min-width: 850px) { .modal-body { grid-template-columns: 350px 1fr; } }
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-800">
 
-        .sandbox-info { padding: 2rem; border-right: 1px solid var(--border); background: rgba(255,255,255,0.01); }
-        .sandbox-view { background: #020617; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
+      {/* HEADER */}
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-blue-700">MAKERSAGOS SAC</h1>
+        </div>
+      </header>
 
-        /* COMPONENTES SIMULADOS */
-        .sim-box { background: var(--bg-elevated); padding: 2rem; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--border); }
-        .sim-input { width: 100%; background: var(--bg-deep); border: 1px solid var(--border); padding: 0.8rem; border-radius: 10px; color: white; margin-bottom: 1rem; outline: none; }
-        .sim-input:focus { border-color: var(--primary); }
+      {/* HERO */}
+      <section className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white py-20 text-center">
+        <h2 className="text-4xl font-extrabold mb-4">Soluciones Tecnológicas & Educación Especializada</h2>
+        <p className="mb-6">Eventos académicos, desarrollo de software y plantillas premium.</p>
+        <button
+          onClick={handleEventClick}
+          className="bg-white text-blue-700 px-8 py-3 rounded-2xl font-semibold shadow-lg hover:scale-105 transition"
+        >
+          Información del Evento Actual
+        </button>
+      </section>
 
-        /* TOAST */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-elevated); border: 1px solid var(--primary); padding: 1rem 2rem; border-radius: 50px; transition: 0.5s; z-index: 3000; }
-        #toast.active { transform: translateX(-50%) translateY(0); }
-
-        /* MOBILE MENU */
-        .menu-btn { display: flex; background: none; border: none; color: white; cursor: pointer; }
-        @media (min-width: 768px) { .nav-links { display: flex; } .menu-btn { display: none; } }
-
-        footer { padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 6rem; text-align: center; }
-    </style>
-</head>
-<body>
-
-    <nav id="navbar">
-        <div class="container nav-inner">
-            <a href="#" class="logo"><i data-lucide="zap"></i> MAKER<span>SAGO</span></a>
-            <div class="nav-links">
-                <a href="#inicio">Inicio</a>
-                <a href="#productos">Tienda</a>
-                <a href="#demos">Demos</a>
-                <a href="#eventos">Eventos</a>
-                <a href="#contacto">Contacto</a>
+      {/* EVENTOS PASADOS */}
+      <section className="py-16 bg-gray-100 text-center">
+        <h3 className="text-2xl font-bold mb-6">Eventos Realizados</h3>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {pastEvents.map((event, index) => (
+            <div key={index} className="bg-white p-6 rounded-xl shadow">
+              {event}
             </div>
-            <button class="menu-btn" onclick="toggleMobileMenu()"><i data-lucide="menu"></i></button>
+          ))}
         </div>
-    </nav>
+      </section>
 
-    <header id="inicio" class="hero container">
-        <h1>Ingeniería y Tecnología <br><span class="text-gradient">a tu Alcance</span></h1>
-        <p>Especialistas en desarrollo de software, electrónica avanzada e impresión 3D. Adquiere componentes para tus proyectos o implementa nuestras soluciones empresariales.</p>
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="#productos" class="btn btn-primary">Ver Tienda <i data-lucide="shopping-cart"></i></a>
-            <a href="#demos" class="btn btn-outline">Probar Demos Interactivas</a>
+      {/* CONTADOR */}
+      <section className="py-16 text-center">
+        <h3 className="text-2xl font-bold mb-6">Cuenta regresiva para {eventName}</h3>
+        <div className="flex justify-center gap-6 text-xl font-semibold">
+          <div>{timeLeft.days}d</div>
+          <div>{timeLeft.hours}h</div>
+          <div>{timeLeft.minutes}m</div>
+          <div>{timeLeft.seconds}s</div>
         </div>
-    </header>
+      </section>
 
-    <!-- SECCIÓN TIENDA DE ELECTRÓNICA -->
-    <section id="productos" class="container" style="padding: 80px 0;">
-        <div class="section-header">
-            <h2>Tienda Maker</h2>
-            <p style="color: var(--text-muted);">Componentes seleccionados para tus proyectos de robótica e ingeniería.</p>
+      {/* PLANTILLAS */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <h3 className="text-3xl font-bold text-center mb-12">Plantillas Demo Interactivas</h3>
+          <div className="grid md:grid-cols-3 gap-10">
+            {templates.map((template) => (
+              <div key={template.id} className="bg-white p-8 rounded-2xl shadow-lg text-center hover:shadow-2xl transition">
+                <h4 className="text-xl font-semibold mb-4 text-blue-700">{template.name}</h4>
+                <p className="mb-4">{template.desc}</p>
+                <p className="font-bold mb-6 text-lg">{template.price}</p>
+                <button
+                  onClick={() => handleTemplateBuy(template)}
+                  className="bg-blue-700 text-white px-6 py-3 rounded-2xl hover:bg-blue-800 transition"
+                >
+                  Comprar
+                </button>
+                <button
+                  onClick={() => { setSelectedTemplate(template); setCarouselIndex(0); }}
+                  className="block mt-4 text-blue-600 underline"
+                >
+                  Ver Demo
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <div class="grid" id="products-grid">
-            <!-- Cargado por JS -->
-        </div>
-    </section>
+      </section>
 
-    <!-- SECCIÓN DEMOS INTERACTIVOS -->
-    <section id="demos" class="container" style="padding: 80px 0; background: rgba(6,182,212,0.02); border-radius: 50px;">
-        <div class="section-header">
-            <h2>Demos de Software</h2>
-            <p style="color: var(--text-muted);">Interactúa con nuestras soluciones de código antes de implementarlas.</p>
-        </div>
-        <div class="grid" id="demos-grid">
-            <!-- Cargado por JS -->
-        </div>
-    </section>
-
-    <!-- HUB DE EVENTOS -->
-    <section id="eventos" class="container" style="padding: 80px 0;">
-        <div class="section-header">
-            <h2>Congresos & Seminarios</h2>
-            <p style="color: var(--text-muted);">Capacítate con expertos internacionales en tecnología maker.</p>
-        </div>
-        <div class="grid">
-            <div class="card">
-                <div class="card-img">
-                    <img src="https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop" alt="Congreso">
-                </div>
-                <div class="card-body">
-                    <h3>Congreso Robótica 2026</h3>
-                    <p>Evento presencial en Lima sobre automatización industrial y robótica móvil.</p>
-                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openEventModal('Congreso Robótica')">Inscribirse</button>
-                </div>
+      {/* MODAL CON CARRUSEL */}
+      {selectedTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-2xl max-w-2xl w-full text-center relative">
+            <h4 className="text-2xl font-bold mb-4">{selectedTemplate.name}</h4>
+            <img
+              src={selectedTemplate.images[carouselIndex]}
+              alt="demo"
+              className="w-full h-80 object-cover rounded-xl mb-4"
+            />
+            <div className="flex justify-between mb-4">
+              <button onClick={prevImage} className="px-4 py-2 bg-gray-200 rounded">Anterior</button>
+              <button onClick={nextImage} className="px-4 py-2 bg-gray-200 rounded">Siguiente</button>
             </div>
-            <div class="card">
-                <div class="card-img">
-                    <img src="https://images.unsplash.com/photo-1591115765373-520b7a217294?q=80&w=2070&auto=format&fit=crop" alt="Seminario">
-                </div>
-                <div class="card-body">
-                    <h3>Seminario IA & Seguros</h3>
-                    <p>Descubre cómo la IA está revolucionando la gestión de pólizas y atención al cliente.</p>
-                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openEventModal('Seminario IA Seguros')">Inscribirse</button>
-                </div>
-            </div>
+            <p className="font-bold mb-4">Precio: {selectedTemplate.price}</p>
+            <button
+              onClick={() => handleTemplateBuy(selectedTemplate)}
+              className="bg-green-600 text-white px-6 py-3 rounded-xl"
+            >Comprar Ahora</button>
+            <button
+              onClick={() => setSelectedTemplate(null)}
+              className="block mt-4 text-red-600"
+            >Cerrar</button>
+          </div>
         </div>
-    </section>
+      )}
 
-    <!-- MODAL SANDBOX (DEMOS) -->
-    <div id="previewModal" class="modal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h2 id="m-title">Vista Previa</h2>
-                <i data-lucide="x" style="cursor: pointer;" onclick="closeModals()"></i>
-            </div>
-            <div class="modal-grid">
-                <div class="sandbox-info">
-                    <h3 id="m-subtitle" style="margin-bottom: 1rem;">Detalles</h3>
-                    <p id="m-desc" style="color: var(--text-muted); margin-bottom: 2rem;">...</p>
-                    <div style="background: var(--bg-deep); padding: 1.5rem; border-radius: 15px; border: 1px solid var(--border);">
-                        <div style="font-size: 0.7rem; color: var(--primary); font-weight: 800; text-transform: uppercase;">Precio Licencia</div>
-                        <div id="m-price" style="font-size: 1.8rem; font-weight: 800;">S/ 0</div>
-                    </div>
-                    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;">
-                        <a id="m-buy" href="#" class="btn btn-primary" style="justify-content: center;">Comprar Código</a>
-                        <button class="btn btn-outline" style="justify-content: center;" onclick="closeModals()">Cerrar</button>
-                    </div>
-                </div>
-                <div class="sandbox-view" id="m-render">
-                    <!-- Render Dinámico -->
-                </div>
-            </div>
-        </div>
+      <footer className="bg-gray-900 text-gray-400 py-6 text-center">
+        © {new Date().getFullYear()} MAKERSAGOS SAC - Tecnología & Educación
+      </footer>
+
     </div>
-
-    <!-- MODAL REGISTRO -->
-    <div id="eventModal" class="modal">
-        <div class="modal-box" style="max-width: 500px; height: auto;">
-            <div class="modal-header">
-                <h2 id="e-title">Registro de Evento</h2>
-                <i data-lucide="x" style="cursor: pointer;" onclick="closeModals()"></i>
-            </div>
-            <div style="padding: 2rem;">
-                <form id="e-form">
-                    <input type="hidden" id="e-hidden-name">
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Nombre Completo</label>
-                    <input type="text" id="e-name" class="sim-input" required placeholder="Juan Velazquez">
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">WhatsApp</label>
-                    <input type="tel" id="e-phone" class="sim-input" required placeholder="987654321">
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1rem;">Confirmar Inscripción</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast">✅ Acción realizada</div>
-
-    <footer>
-        <div class="container">
-            <div class="logo" style="justify-content: center; margin-bottom: 2rem;"><i data-lucide="zap"></i> MAKER<span>SAGO</span></div>
-            <p style="color: var(--text-muted);">© 2026 Maker Sago Platform. Lima, Perú.</p>
-        </div>
-    </footer>
-
-    <script>
-        lucide.createIcons();
-
-        // NAVEGACIÓN SCROLL
-        window.onscroll = () => {
-            const nav = document.getElementById('navbar');
-            if(window.scrollY > 50) nav.classList.add('scrolled');
-            else nav.classList.remove('scrolled');
-        };
-
-        // PRODUCTOS ELECTRÓNICOS
-        const products = [
-            {
-                name: "Arduino Uno R3 Original",
-                desc: "Microcontrolador ideal para aprendizaje y prototipado rápido.",
-                price: "S/ 85",
-                img: "https://images.unsplash.com/photo-1608564697071-ddf911d81370?q=80&w=1000&auto=format&fit=crop"
-            },
-            {
-                name: "Raspberry Pi 4 Model B",
-                desc: "Computadora de placa única de 4GB RAM para proyectos avanzados.",
-                price: "S/ 380",
-                img: "https://images.unsplash.com/photo-1555421689-d68441e9975e?q=80&w=1000&auto=format&fit=crop"
-            },
-            {
-                name: "Impresora 3D Ender 3 V3",
-                desc: "Alta precisión y velocidad para tus piezas mecánicas.",
-                price: "S/ 1250",
-                img: "https://images.unsplash.com/photo-1631553127988-346395995536?q=80&w=1000&auto=format&fit=crop"
-            },
-            {
-                name: "Kit Sensores 37 en 1",
-                desc: "Todo lo que necesitas para dominar la electrónica básica.",
-                price: "S/ 110",
-                img: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=1000&auto=format&fit=crop"
-            }
-        ];
-
-        // DEMOS DE SOFTWARE
-        const demos = [
-            {
-                id: 1,
-                title: 'SOAT Digital Pro',
-                desc: 'Formulario dinámico con cálculo automático por rubro y validación de placa.',
-                price: 'S/ 280',
-                img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=1000',
-                render: () => `
-                    <div class="sim-box">
-                        <h4 style="margin-bottom:1rem">Cotizador SOAT</h4>
-                        <input class="sim-input" placeholder="PLACA (ABC-123)" id="soat-placa">
-                        <select class="sim-input" id="soat-tipo">
-                            <option value="55">Particular (S/ 55)</option>
-                            <option value="150">Taxi (S/ 150)</option>
-                            <option value="250">Carga (S/ 250)</option>
-                        </select>
-                        <button class="btn btn-primary" style="width:100%" onclick="calcDemoSoat()">Cotizar</button>
-                        <div id="soat-res" style="display:none; margin-top:1rem; text-align:center; font-weight:800; color:var(--primary)">S/ 0</div>
-                    </div>
-                `
-            },
-            {
-                id: 2,
-                title: 'E-commerce Reactivo',
-                desc: 'Dashboard de ventas con carrito de compras y cálculo de IGV automático.',
-                price: 'S/ 450',
-                img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000',
-                render: () => `
-                    <div class="sim-box">
-                        <h4>Carrito Demo</h4>
-                        <div style="display:flex; justify-content:space-between; margin-top:1rem">
-                            <span>Item A</span><b>S/ 100</b>
-                            <button onclick="updateDemoCart(100)">+</button>
-                        </div>
-                        <div style="border-top:1px solid #334155; margin-top:1rem; padding-top:1rem">
-                            <b>Total (IGV):</b> <span id="cart-res">S/ 0</span>
-                        </div>
-                    </div>
-                `
-            }
-        ];
-
-        function loadItems() {
-            // Cargar Productos
-            const pGrid = document.getElementById('products-grid');
-            products.forEach(p => {
-                pGrid.innerHTML += `
-                    <div class="card">
-                        <div class="card-img"><img src="${p.img}"></div>
-                        <div class="card-body">
-                            <h3>${p.name}</h3>
-                            <p>${p.desc}</p>
-                            <div class="card-footer">
-                                <span class="price">${p.price}</span>
-                                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20quiero%20comprar%20el%20producto:%20${p.name}" class="btn btn-primary" style="padding:0.5rem 1rem">Comprar</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Cargar Demos
-            const dGrid = document.getElementById('demos-grid');
-            demos.forEach(d => {
-                dGrid.innerHTML += `
-                    <div class="card">
-                        <div class="card-img" onclick="openPreview(${d.id})"><img src="${d.img}"></div>
-                        <div class="card-body">
-                            <h3>${d.title}</h3>
-                            <p>${d.desc}</p>
-                            <div class="card-footer">
-                                <span class="price">${d.price}</span>
-                                <button class="btn btn-outline" onclick="openPreview(${d.id})">Demo</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // LÓGICA MODALES
-        function openPreview(id) {
-            const d = demos.find(i => i.id === id);
-            document.getElementById('m-title').innerText = d.title;
-            document.getElementById('m-desc').innerText = d.desc;
-            document.getElementById('m-price').innerText = d.price;
-            document.getElementById('m-render').innerHTML = d.render();
-            document.getElementById('m-buy').href = `https://wa.me/51987654321?text=Quiero%20el%20código%20de%20${d.title}`;
-            document.getElementById('previewModal').classList.add('active');
-        }
-
-        function openEventModal(name) {
-            document.getElementById('e-title').innerText = "Registro: " + name;
-            document.getElementById('e-hidden-name').value = name;
-            document.getElementById('eventModal').classList.add('active');
-        }
-
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-        }
-
-        // FUNCIONES DEMO
-        window.calcDemoSoat = () => {
-            const val = document.getElementById('soat-tipo').value;
-            const res = document.getElementById('soat-res');
-            res.innerText = "S/ " + val;
-            res.style.display = 'block';
-            showToast("Cotización calculada");
-        };
-
-        let demoTotal = 0;
-        window.updateDemoCart = (v) => {
-            demoTotal += v;
-            document.getElementById('cart-res').innerText = "S/ " + (demoTotal * 1.18).toFixed(2);
-            showToast("Producto añadido al carrito");
-        };
-
-        window.showToast = (msg) => {
-            const t = document.getElementById('toast');
-            t.innerText = "✅ " + msg;
-            t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 3000);
-        };
-
-        // REGISTRO
-        document.getElementById('e-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                evento: document.getElementById('e-hidden-name').value,
-                nombre: document.getElementById('e-name').value,
-                whatsapp: document.getElementById('e-phone').value
-            };
-            const res = await window.saveLead('registros_hub', data);
-            if(res.success) {
-                window.location.href = "https://chat.whatsapp.com/LKC3qE0oKOlC4tnt48VY3K";
-            } else {
-                alert("Error al guardar registro.");
-            }
-        };
-
-        window.onclick = (e) => { if(e.target.classList.contains('modal')) closeModals(); };
-        window.onload = () => loadItems();
-    </script>
-</body>
-</html>
+  );
+}
