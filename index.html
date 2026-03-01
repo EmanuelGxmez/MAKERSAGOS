@@ -3,581 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maker Sago | Ingeniería, Software e Innovación</title>
+    <title>Maker Sago | Ingeniería, Software & Electrónica</title>
     
-    <!-- Librerías Externas -->
+    <!-- Librerías de Estilo e Íconos -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     
-    <!-- Configuración Firebase (Persistencia de Datos) -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Globales del entorno
         const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'maker-sago-prod';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'maker-sago-v2';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Sistema de autenticación previa a cualquier operación (Regla 3)
-        async function authenticate() {
+        async function startSession() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-            }
+                await signInAnonymously(auth);
+            } catch (err) { console.error("Error de Sesión:", err); }
         }
-        authenticate();
+        startSession();
 
-        // Función global para guardar inscripciones
-        window.processInscription = async (data) => {
-            if (!auth.currentUser) return { success: false, msg: "No autenticado" };
-            
+        window.saveLead = async (collectionName, data) => {
+            if (!auth.currentUser) return { success: false };
             try {
-                // Ruta estricta (Regla 1)
-                const path = collection(db, 'artifacts', appId, 'public', 'data', 'inscripciones');
-                await addDoc(path, {
-                    ...data,
-                    timestamp: serverTimestamp(),
-                    status: 'pendiente'
-                });
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+                await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
                 return { success: true };
-            } catch (e) {
-                console.error("Firestore Error:", e);
-                return { success: false, msg: e.message };
-            }
+            } catch (e) { return { success: false, error: e.message }; }
         };
     </script>
 
     <style>
-        /* --- DISEÑO DE SISTEMA (CSS VARIABLES) --- */
         :root {
-            --primary: #06b6d4;      /* Cian Maker */
-            --primary-dark: #0891b2;
-            --accent: #3b82f6;       /* Azul Tech */
-            --bg-main: #020617;      /* Slate 950 */
-            --bg-card: #0f172a;      /* Slate 900 */
-            --bg-input: #1e293b;     /* Slate 800 */
-            --text-white: #f8fafc;
-            --text-dim: #94a3b8;
-            --success: #22c55e;
-            --border: rgba(51, 65, 85, 0.5);
-            --glass: rgba(15, 23, 42, 0.8);
+            --primary: #06b6d4;
+            --primary-glow: rgba(6, 182, 212, 0.4);
+            --secondary: #6366f1;
+            --bg-deep: #020617;
+            --bg-surface: #0f172a;
+            --bg-elevated: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --whatsapp: #25d366;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- RESET Y BASE --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--bg-deep); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        
+        /* UTILIDADES */
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        .text-gradient { background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--border); }
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-white);
-            line-height: 1.6;
-            scroll-behavior: smooth;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        /* --- NAVEGACIÓN --- */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            height: 75px;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-        }
-
+        /* NAVEGACIÓN */
+        nav { position: fixed; top: 0; width: 100%; z-index: 1000; height: 80px; display: flex; align-items: center; transition: 0.3s; }
+        nav.scrolled { background: var(--bg-deep); border-bottom: 1px solid var(--border); }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .logo { font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
         .logo span { color: var(--primary); }
 
-        .nav-links {
-            display: none;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
+        .nav-links { display: none; gap: 2rem; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
         .nav-links a:hover { color: var(--primary); }
 
-        /* --- BOTONES --- */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: none;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
+        /* HERO */
+        .hero { padding: 160px 0 80px; text-align: center; position: relative; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -2px; }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 750px; margin: 0 auto 2.5rem; }
 
-        .btn-primary { background: var(--primary); color: var(--bg-main); }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4); }
-
+        /* BOTONES */
+        .btn { padding: 0.8rem 1.8rem; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; border: none; }
+        .btn-primary { background: var(--primary); color: var(--bg-deep); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
         .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
-        .btn-outline:hover { background: var(--bg-card); border-color: var(--primary); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); }
 
-        /* --- HERO --- */
-        .hero {
-            padding: 160px 0 100px;
-            text-align: center;
-            background: radial-gradient(circle at 50% -20%, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
-        }
-
-        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; font-weight: 900; }
-        .hero p { font-size: 1.25rem; color: var(--text-dim); max-width: 700px; margin: 0 auto 2.5rem; }
-
-        /* --- SECCIÓN PLANTILLAS (FILTRADO) --- */
-        .section-header { text-align: center; margin-bottom: 3rem; }
-        .section-header h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        /* SECCIONES */
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
         
-        .filter-bar {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-item {
-            padding: 0.6rem 1.2rem;
-            border-radius: 30px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .filter-item.active { background: var(--primary); color: var(--bg-main); border-color: var(--primary); font-weight: bold; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            transition: all 0.4s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
-
-        .card-img {
-            height: 220px;
-            background: #000;
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* GRID DE PRODUCTOS / CARDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .card { background: var(--bg-surface); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; transition: 0.4s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: var(--card-shadow); }
+        
+        .card-img { height: 200px; background: #000; position: relative; overflow: hidden; }
         .card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; opacity: 0.8; }
-        .card:hover .card-img img { transform: scale(1.1); opacity: 1; }
-
-        .card-tag {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(6, 182, 212, 0.9);
-            color: var(--bg-main);
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 800;
-        }
-
-        .card-body { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-body h3 { font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--primary); }
-        .card-body p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
+        .card:hover .card-img img { opacity: 1; transform: scale(1.1); }
         
-        .card-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 1rem; }
-        .price-tag { font-size: 1.5rem; font-weight: 800; }
+        .card-body { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-body h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: white; }
+        .card-body p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; flex-grow: 1; }
+        
+        .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .price { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
-        /* --- MODAL --- */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(8px);
-            padding: 1rem;
-        }
+        /* MODALES */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 1rem; }
+        .modal.active { display: flex; }
+        .modal-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 24px; width: 100%; max-width: 1000px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .modal-header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: 1fr; }
+        @media (min-width: 850px) { .modal-body { grid-template-columns: 350px 1fr; } }
 
-        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .sandbox-info { padding: 2rem; border-right: 1px solid var(--border); background: rgba(255,255,255,0.01); }
+        .sandbox-view { background: #020617; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; }
 
-        .modal-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 2.5rem;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 480px;
-            position: relative;
-        }
+        /* COMPONENTES SIMULADOS */
+        .sim-box { background: var(--bg-elevated); padding: 2rem; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+        .sim-input { width: 100%; background: var(--bg-deep); border: 1px solid var(--border); padding: 0.8rem; border-radius: 10px; color: white; margin-bottom: 1rem; outline: none; }
+        .sim-input:focus { border-color: var(--primary); }
 
-        .close-modal { position: absolute; top: 1.5rem; right: 1.5rem; cursor: pointer; color: var(--text-dim); }
+        /* TOAST */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-elevated); border: 1px solid var(--primary); padding: 1rem 2rem; border-radius: 50px; transition: 0.5s; z-index: 3000; }
+        #toast.active { transform: translateX(-50%) translateY(0); }
 
-        .form-input {
-            width: 100%;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            padding: 0.9rem 1.2rem;
-            border-radius: 12px;
-            color: white;
-            margin-bottom: 1.25rem;
-            outline: none;
-            font-size: 1rem;
-        }
+        /* MOBILE MENU */
+        .menu-btn { display: flex; background: none; border: none; color: white; cursor: pointer; }
+        @media (min-width: 768px) { .nav-links { display: flex; } .menu-btn { display: none; } }
 
-        .form-input:focus { border-color: var(--primary); }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 5rem 0 2rem;
-            background: var(--bg-darker);
-            border-top: 1px solid var(--border);
-            margin-top: 5rem;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (min-width: 768px) {
-            .nav-links { display: flex; }
-        }
+        footer { padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 6rem; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- NAVEGACIÓN -->
-    <nav>
+    <nav id="navbar">
         <div class="container nav-inner">
-            <div class="logo">
-                <i data-lucide="blocks"></i> Maker<span>Sago</span>
-            </div>
+            <a href="#" class="logo"><i data-lucide="zap"></i> MAKER<span>SAGO</span></a>
             <div class="nav-links">
                 <a href="#inicio">Inicio</a>
-                <a href="#plantillas">Software</a>
-                <a href="#conferencias">Eventos</a>
-                <a href="#asesorias">Asesorías</a>
+                <a href="#productos">Tienda</a>
+                <a href="#demos">Demos</a>
+                <a href="#eventos">Eventos</a>
+                <a href="#contacto">Contacto</a>
             </div>
-            <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20necesito%20una%20consultoría." target="_blank" class="btn btn-primary">
-                WhatsApp Directo
-            </a>
+            <button class="menu-btn" onclick="toggleMobileMenu()"><i data-lucide="menu"></i></button>
         </div>
     </nav>
 
-    <!-- HERO -->
     <header id="inicio" class="hero container">
-        <h1>Ingeniería para el <span style="color: var(--primary);">Futuro Digital</span></h1>
-        <p>Expertos en impresión 3D, desarrollo de software a medida y mentoría tecnológica. Construimos la solución que tu negocio necesita hoy.</p>
+        <h1>Ingeniería y Tecnología <br><span class="text-gradient">a tu Alcance</span></h1>
+        <p>Especialistas en desarrollo de software, electrónica avanzada e impresión 3D. Adquiere componentes para tus proyectos o implementa nuestras soluciones empresariales.</p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="#plantillas" class="btn btn-primary">Explorar Plantillas</a>
-            <a href="#conferencias" class="btn btn-outline">Próximos Eventos</a>
+            <a href="#productos" class="btn btn-primary">Ver Tienda <i data-lucide="shopping-cart"></i></a>
+            <a href="#demos" class="btn btn-outline">Probar Demos Interactivas</a>
         </div>
     </header>
 
-    <!-- SECCIÓN SOFTWARE / PLANTILLAS -->
-    <section id="plantillas" class="container" style="padding: 80px 0;">
+    <!-- SECCIÓN TIENDA DE ELECTRÓNICA -->
+    <section id="productos" class="container" style="padding: 80px 0;">
         <div class="section-header">
-            <h2>Plantillas de Software</h2>
-            <p style="color: var(--text-dim);">Código funcional, limpio y listo para ser implementado en tu rubro.</p>
+            <h2>Tienda Maker</h2>
+            <p style="color: var(--text-muted);">Componentes seleccionados para tus proyectos de robótica e ingeniería.</p>
         </div>
-
-        <div class="filter-bar" id="category-filters">
-            <div class="filter-item active" onclick="filterData('todo')">Todas</div>
-            <div class="filter-item" onclick="filterData('restaurante')">Restaurantes</div>
-            <div class="filter-item" onclick="filterData('tienda')">Tiendas</div>
-            <div class="filter-item" onclick="filterData('salud')">Salud</div>
-            <div class="filter-item" onclick="filterData('otros')">Otros</div>
-        </div>
-
-        <div class="grid" id="software-grid">
-            <!-- Dinámico por JS -->
+        <div class="grid" id="products-grid">
+            <!-- Cargado por JS -->
         </div>
     </section>
 
-    <!-- SECCIÓN CONFERENCIAS -->
-    <section id="conferencias" class="container" style="padding: 80px 0; background: rgba(6, 182, 212, 0.03); border-radius: 40px;">
+    <!-- SECCIÓN DEMOS INTERACTIVOS -->
+    <section id="demos" class="container" style="padding: 80px 0; background: rgba(6,182,212,0.02); border-radius: 50px;">
         <div class="section-header">
-            <h2>Conferencias y Congresos</h2>
-            <p style="color: var(--text-dim);">Únete a nuestras sesiones de capacitación y mejora tus habilidades técnicas.</p>
+            <h2>Demos de Software</h2>
+            <p style="color: var(--text-muted);">Interactúa con nuestras soluciones de código antes de implementarlas.</p>
         </div>
-
-        <div class="grid" id="events-grid">
-            <!-- Evento 1 -->
-            <div class="card">
-                <div class="card-img">
-                    <img src="https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop" alt="Banner Congreso">
-                    <span class="card-tag">Evento Presencial</span>
-                </div>
-                <div class="card-body">
-                    <h3>Congreso Maker Perú 2026</h3>
-                    <p>Hablaremos sobre el impacto de la impresión 3D industrial en el mercado local y automatización con PLC.</p>
-                    <div class="card-footer">
-                        <button class="btn btn-primary" onclick="openEnrollModal('Congreso Maker Perú 2026')">
-                            Inscribirme Ahora
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Evento 2 -->
-            <div class="card">
-                <div class="card-img">
-                    <img src="https://images.unsplash.com/photo-1591115765373-520b7a217294?q=80&w=2070&auto=format&fit=crop" alt="Banner IA">
-                    <span class="card-tag">Online</span>
-                </div>
-                <div class="card-body">
-                    <h3>Masterclass: IA aplicada al Código</h3>
-                    <p>Aprende a integrar APIs de lenguaje en tus aplicaciones web de forma profesional.</p>
-                    <div class="card-footer">
-                        <button class="btn btn-primary" onclick="openEnrollModal('Masterclass IA 2026')">
-                            Inscribirme Ahora
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="grid" id="demos-grid">
+            <!-- Cargado por JS -->
         </div>
     </section>
 
-    <!-- SECCIÓN ASESORÍAS -->
-    <section id="asesorias" class="container" style="padding: 100px 0;">
+    <!-- HUB DE EVENTOS -->
+    <section id="eventos" class="container" style="padding: 80px 0;">
+        <div class="section-header">
+            <h2>Congresos & Seminarios</h2>
+            <p style="color: var(--text-muted);">Capacítate con expertos internacionales en tecnología maker.</p>
+        </div>
         <div class="grid">
-            <div style="padding: 2rem;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Asesorías <span style="color: var(--primary);">Personalizadas</span></h2>
-                <p style="color: var(--text-dim); margin-bottom: 2rem;">¿Tienes un proyecto de grado, una startup o una duda técnica puntual? Ofrecemos sesiones 1-a-1 para resolver problemas de arquitectura, programación o hardware.</p>
-                <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;">
-                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Revisión de Código y Bug Hunting</li>
-                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Optimización de procesos de Impresión 3D</li>
-                    <li><i data-lucide="check-circle" style="color: var(--primary); vertical-align: middle; margin-right: 10px;"></i> Planificación de Proyectos de Ingeniería</li>
-                </ul>
-                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20me%20gustaría%20agendar%20una%20asesoría." class="btn btn-outline">Solicitar Mentoría</a>
+            <div class="card">
+                <div class="card-img">
+                    <img src="https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop" alt="Congreso">
+                </div>
+                <div class="card-body">
+                    <h3>Congreso Robótica 2026</h3>
+                    <p>Evento presencial en Lima sobre automatización industrial y robótica móvil.</p>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openEventModal('Congreso Robótica')">Inscribirse</button>
+                </div>
             </div>
-            <div style="background: var(--bg-card); border-radius: 30px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                 <i data-lucide="cpu" style="width: 150px; height: 150px; color: var(--primary); opacity: 0.2; position: absolute; top: -20px; right: -20px;"></i>
-                 <div style="text-align: center; z-index: 1; padding: 3rem;">
-                    <i data-lucide="users" style="width: 60px; height: 60px; color: var(--primary); margin-bottom: 1rem;"></i>
-                    <h3 style="font-size: 1.5rem;">Mentoría Senior</h3>
-                    <p style="color: var(--text-dim);">Más de 50 proyectos exitosos asesorados.</p>
-                 </div>
+            <div class="card">
+                <div class="card-img">
+                    <img src="https://images.unsplash.com/photo-1591115765373-520b7a217294?q=80&w=2070&auto=format&fit=crop" alt="Seminario">
+                </div>
+                <div class="card-body">
+                    <h3>Seminario IA & Seguros</h3>
+                    <p>Descubre cómo la IA está revolucionando la gestión de pólizas y atención al cliente.</p>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openEventModal('Seminario IA Seguros')">Inscribirse</button>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- MODAL DE INSCRIPCIÓN -->
-    <div id="enrollModal" class="modal">
+    <!-- MODAL SANDBOX (DEMOS) -->
+    <div id="previewModal" class="modal">
         <div class="modal-box">
-            <i data-lucide="x" class="close-modal" onclick="closeEnrollModal()"></i>
-            <h2 style="margin-bottom: 0.5rem;">Registro de Evento</h2>
-            <p id="modalEventName" style="color: var(--primary); font-weight: bold; margin-bottom: 2rem;">Nombre del Evento</p>
-            
-            <form id="enrollForm">
-                <input type="text" id="formName" class="form-input" placeholder="Tu Nombre Completo" required>
-                <input type="tel" id="formPhone" class="form-input" placeholder="WhatsApp (Ej: 987654321)" required>
-                <input type="email" id="formEmail" class="form-input" placeholder="Tu Correo Electrónico" required>
-                
-                <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-                    Confirmar y Unirme al Grupo
-                </button>
-            </form>
-            <p style="text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-top: 1.5rem;">
-                Al registrarte, te redirigiremos a nuestro grupo oficial de WhatsApp.
-            </p>
+            <div class="modal-header">
+                <h2 id="m-title">Vista Previa</h2>
+                <i data-lucide="x" style="cursor: pointer;" onclick="closeModals()"></i>
+            </div>
+            <div class="modal-grid">
+                <div class="sandbox-info">
+                    <h3 id="m-subtitle" style="margin-bottom: 1rem;">Detalles</h3>
+                    <p id="m-desc" style="color: var(--text-muted); margin-bottom: 2rem;">...</p>
+                    <div style="background: var(--bg-deep); padding: 1.5rem; border-radius: 15px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.7rem; color: var(--primary); font-weight: 800; text-transform: uppercase;">Precio Licencia</div>
+                        <div id="m-price" style="font-size: 1.8rem; font-weight: 800;">S/ 0</div>
+                    </div>
+                    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;">
+                        <a id="m-buy" href="#" class="btn btn-primary" style="justify-content: center;">Comprar Código</a>
+                        <button class="btn btn-outline" style="justify-content: center;" onclick="closeModals()">Cerrar</button>
+                    </div>
+                </div>
+                <div class="sandbox-view" id="m-render">
+                    <!-- Render Dinámico -->
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- MODAL REGISTRO -->
+    <div id="eventModal" class="modal">
+        <div class="modal-box" style="max-width: 500px; height: auto;">
+            <div class="modal-header">
+                <h2 id="e-title">Registro de Evento</h2>
+                <i data-lucide="x" style="cursor: pointer;" onclick="closeModals()"></i>
+            </div>
+            <div style="padding: 2rem;">
+                <form id="e-form">
+                    <input type="hidden" id="e-hidden-name">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Nombre Completo</label>
+                    <input type="text" id="e-name" class="sim-input" required placeholder="Juan Velazquez">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">WhatsApp</label>
+                    <input type="tel" id="e-phone" class="sim-input" required placeholder="987654321">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem; margin-top: 1rem;">Confirmar Inscripción</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">✅ Acción realizada</div>
+
     <footer>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
-            <div class="logo">
-                <i data-lucide="blocks"></i> Maker<span>Sago</span>
-            </div>
-            <div style="display: flex; gap: 1.5rem;">
-                <a href="#" class="nav-links">GitHub</a>
-                <a href="#" class="nav-links">Instagram</a>
-                <a href="#" class="nav-links">LinkedIn</a>
-            </div>
-            <p style="color: var(--text-dim); font-size: 0.9rem; width: 100%; text-align: center; margin-top: 2rem;">
-                &copy; 2026 Maker Sago | Hecho por Makers para Makers. Lima, Perú.
-            </p>
+        <div class="container">
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;"><i data-lucide="zap"></i> MAKER<span>SAGO</span></div>
+            <p style="color: var(--text-muted);">© 2026 Maker Sago Platform. Lima, Perú.</p>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT DE LÓGICA -->
     <script>
-        // Inicializar Lucide
         lucide.createIcons();
 
-        // Base de Datos de Software
-        const softwareData = [
+        // NAVEGACIÓN SCROLL
+        window.onscroll = () => {
+            const nav = document.getElementById('navbar');
+            if(window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        };
+
+        // PRODUCTOS ELECTRÓNICOS
+        const products = [
             {
-                id: 1,
-                cat: 'restaurante',
-                title: 'Menú Digital Smart',
-                desc: 'Web App con código QR, gestión de categorías e integración con pedidos de WhatsApp.',
-                price: 'S/ 180',
-                img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop'
+                name: "Arduino Uno R3 Original",
+                desc: "Microcontrolador ideal para aprendizaje y prototipado rápido.",
+                price: "S/ 85",
+                img: "https://images.unsplash.com/photo-1608564697071-ddf911d81370?q=80&w=1000&auto=format&fit=crop"
             },
             {
-                id: 2,
-                cat: 'tienda',
-                title: 'E-commerce Minimalista',
-                desc: 'Tienda lista para catálogos de ropa o tecnología con panel de administración simple.',
-                price: 'S/ 320',
-                img: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2070&auto=format&fit=crop'
+                name: "Raspberry Pi 4 Model B",
+                desc: "Computadora de placa única de 4GB RAM para proyectos avanzados.",
+                price: "S/ 380",
+                img: "https://images.unsplash.com/photo-1555421689-d68441e9975e?q=80&w=1000&auto=format&fit=crop"
             },
             {
-                id: 3,
-                cat: 'salud',
-                title: 'Agenda de Citas Pro',
-                desc: 'Sistema para salones de belleza o dentistas. Organización por horas y recordatorios.',
-                price: 'S/ 250',
-                img: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=2070&auto=format&fit=crop'
+                name: "Impresora 3D Ender 3 V3",
+                desc: "Alta precisión y velocidad para tus piezas mecánicas.",
+                price: "S/ 1250",
+                img: "https://images.unsplash.com/photo-1631553127988-346395995536?q=80&w=1000&auto=format&fit=crop"
             },
             {
-                id: 4,
-                cat: 'otros',
-                title: 'Landing Page Corporativa',
-                desc: 'Diseño de alto impacto para agencias o consultoras. SEO optimizado.',
-                price: 'S/ 150',
-                img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop'
+                name: "Kit Sensores 37 en 1",
+                desc: "Todo lo que necesitas para dominar la electrónica básica.",
+                price: "S/ 110",
+                img: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=1000&auto=format&fit=crop"
             }
         ];
 
-        // Lógica de Filtrado
-        function filterData(category) {
-            const grid = document.getElementById('software-grid');
-            const filters = document.querySelectorAll('.filter-item');
-            
-            // UI Update
-            filters.forEach(f => f.classList.remove('active'));
-            event.target.classList.add('active');
-
-            grid.innerHTML = '';
-            
-            const filtered = category === 'todo' ? softwareData : softwareData.filter(s => s.cat === category);
-
-            filtered.forEach(item => {
-                grid.innerHTML += `
-                    <div class="card">
-                        <div class="card-img">
-                            <img src="${item.img}" alt="${item.title}">
-                            <span class="card-tag">${item.cat.toUpperCase()}</span>
+        // DEMOS DE SOFTWARE
+        const demos = [
+            {
+                id: 1,
+                title: 'SOAT Digital Pro',
+                desc: 'Formulario dinámico con cálculo automático por rubro y validación de placa.',
+                price: 'S/ 280',
+                img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=1000',
+                render: () => `
+                    <div class="sim-box">
+                        <h4 style="margin-bottom:1rem">Cotizador SOAT</h4>
+                        <input class="sim-input" placeholder="PLACA (ABC-123)" id="soat-placa">
+                        <select class="sim-input" id="soat-tipo">
+                            <option value="55">Particular (S/ 55)</option>
+                            <option value="150">Taxi (S/ 150)</option>
+                            <option value="250">Carga (S/ 250)</option>
+                        </select>
+                        <button class="btn btn-primary" style="width:100%" onclick="calcDemoSoat()">Cotizar</button>
+                        <div id="soat-res" style="display:none; margin-top:1rem; text-align:center; font-weight:800; color:var(--primary)">S/ 0</div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: 'E-commerce Reactivo',
+                desc: 'Dashboard de ventas con carrito de compras y cálculo de IGV automático.',
+                price: 'S/ 450',
+                img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000',
+                render: () => `
+                    <div class="sim-box">
+                        <h4>Carrito Demo</h4>
+                        <div style="display:flex; justify-content:space-between; margin-top:1rem">
+                            <span>Item A</span><b>S/ 100</b>
+                            <button onclick="updateDemoCart(100)">+</button>
                         </div>
+                        <div style="border-top:1px solid #334155; margin-top:1rem; padding-top:1rem">
+                            <b>Total (IGV):</b> <span id="cart-res">S/ 0</span>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        function loadItems() {
+            // Cargar Productos
+            const pGrid = document.getElementById('products-grid');
+            products.forEach(p => {
+                pGrid.innerHTML += `
+                    <div class="card">
+                        <div class="card-img"><img src="${p.img}"></div>
                         <div class="card-body">
-                            <h3>${item.title}</h3>
-                            <p>${item.desc}</p>
+                            <h3>${p.name}</h3>
+                            <p>${p.desc}</p>
                             <div class="card-footer">
-                                <span class="price-tag">${item.price}</span>
-                                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20me%20interesa%20comprar%20la%20plantilla:%20${item.title}" class="btn btn-outline">Ver Demo</a>
+                                <span class="price">${p.price}</span>
+                                <a href="https://wa.me/51987654321?text=Hola%20Maker%20Sago,%20quiero%20comprar%20el%20producto:%20${p.name}" class="btn btn-primary" style="padding:0.5rem 1rem">Comprar</a>
                             </div>
                         </div>
                     </div>
                 `;
             });
-            lucide.createIcons();
+
+            // Cargar Demos
+            const dGrid = document.getElementById('demos-grid');
+            demos.forEach(d => {
+                dGrid.innerHTML += `
+                    <div class="card">
+                        <div class="card-img" onclick="openPreview(${d.id})"><img src="${d.img}"></div>
+                        <div class="card-body">
+                            <h3>${d.title}</h3>
+                            <p>${d.desc}</p>
+                            <div class="card-footer">
+                                <span class="price">${d.price}</span>
+                                <button class="btn btn-outline" onclick="openPreview(${d.id})">Demo</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
-        // Lógica del Modal e Inscripción
-        const modal = document.getElementById('enrollModal');
-        const modalEventName = document.getElementById('modalEventName');
-        const enrollForm = document.getElementById('enrollForm');
-        const WHATSAPP_GROUP = "https://chat.whatsapp.com/LKC3qE0oKOlC4tnt48VY3K";
-
-        function openEnrollModal(name) {
-            modalEventName.innerText = name;
-            modal.classList.add('active');
+        // LÓGICA MODALES
+        function openPreview(id) {
+            const d = demos.find(i => i.id === id);
+            document.getElementById('m-title').innerText = d.title;
+            document.getElementById('m-desc').innerText = d.desc;
+            document.getElementById('m-price').innerText = d.price;
+            document.getElementById('m-render').innerHTML = d.render();
+            document.getElementById('m-buy').href = `https://wa.me/51987654321?text=Quiero%20el%20código%20de%20${d.title}`;
+            document.getElementById('previewModal').classList.add('active');
         }
 
-        function closeEnrollModal() {
-            modal.classList.remove('active');
+        function openEventModal(name) {
+            document.getElementById('e-title').innerText = "Registro: " + name;
+            document.getElementById('e-hidden-name').value = name;
+            document.getElementById('eventModal').classList.add('active');
         }
 
-        enrollForm.onsubmit = async (e) => {
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        // FUNCIONES DEMO
+        window.calcDemoSoat = () => {
+            const val = document.getElementById('soat-tipo').value;
+            const res = document.getElementById('soat-res');
+            res.innerText = "S/ " + val;
+            res.style.display = 'block';
+            showToast("Cotización calculada");
+        };
+
+        let demoTotal = 0;
+        window.updateDemoCart = (v) => {
+            demoTotal += v;
+            document.getElementById('cart-res').innerText = "S/ " + (demoTotal * 1.18).toFixed(2);
+            showToast("Producto añadido al carrito");
+        };
+
+        window.showToast = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = "✅ " + msg;
+            t.classList.add('active');
+            setTimeout(() => t.classList.remove('active'), 3000);
+        };
+
+        // REGISTRO
+        document.getElementById('e-form').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "Guardando Datos...";
-            btn.disabled = true;
-
-            const userData = {
-                evento: modalEventName.innerText,
-                nombre: document.getElementById('formName').value,
-                whatsapp: document.getElementById('formPhone').value,
-                email: document.getElementById('formEmail').value
+            const data = {
+                evento: document.getElementById('e-hidden-name').value,
+                nombre: document.getElementById('e-name').value,
+                whatsapp: document.getElementById('e-phone').value
             };
-
-            const result = await window.processInscription(userData);
-
-            if (result.success) {
-                // Redirigir al grupo
-                window.location.href = WHATSAPP_GROUP;
+            const res = await window.saveLead('registros_hub', data);
+            if(res.success) {
+                window.location.href = "https://chat.whatsapp.com/LKC3qE0oKOlC4tnt48VY3K";
             } else {
-                alert("Ocurrió un error: " + result.msg);
-                btn.innerText = "Confirmar e Inscribirme";
-                btn.disabled = false;
+                alert("Error al guardar registro.");
             }
         };
 
-        // Cerrar modal al clickear fuera
-        window.onclick = (e) => { if (e.target == modal) closeEnrollModal(); };
-
-        // Carga inicial
-        window.onload = () => {
-            filterData('todo');
-        };
+        window.onclick = (e) => { if(e.target.classList.contains('modal')) closeModals(); };
+        window.onload = () => loadItems();
     </script>
 </body>
 </html>
