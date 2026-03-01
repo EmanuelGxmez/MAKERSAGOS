@@ -1,1 +1,296 @@
-<h1>hello</h1>
+import React, { useState } from 'react';
+import { 
+  Cpu, 
+  Printer, 
+  Code, 
+  Wrench, 
+  Lightbulb, 
+  Zap, 
+  Menu, 
+  X, 
+  ChevronRight, 
+  Mail, 
+  MapPin, 
+  Phone 
+} from 'lucide-react';
+
+export default function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Lista de servicios de Maker Sago - ¡Fácil de editar para ti y tu amigo!
+  const services = [
+    {
+      icon: <Printer className="w-8 h-8 text-cyan-400" />,
+      title: "Impresión 3D y Modelado",
+      description: "Materializamos tus ideas. Desde piezas mecánicas hasta prototipos estéticos con alta precisión y diversos materiales."
+    },
+    {
+      icon: <Code className="w-8 h-8 text-cyan-400" />,
+      title: "Desarrollo de Software",
+      description: "Creamos aplicaciones web, móviles y sistemas a medida para optimizar los procesos de tu negocio."
+    },
+    {
+      icon: <Cpu className="w-8 h-8 text-cyan-400" />,
+      title: "Electrónica y Robótica",
+      description: "Diseño de circuitos, automatización y desarrollo de sistemas embebidos con Arduino, Raspberry Pi y más."
+    },
+    {
+      icon: <Wrench className="w-8 h-8 text-cyan-400" />,
+      title: "Prototipado Rápido",
+      description: "Iteramos rápidamente para convertir tu concepto en un producto funcional listo para pruebas de mercado."
+    },
+    {
+      icon: <Lightbulb className="w-8 h-8 text-cyan-400" />,
+      title: "Consultoría Tecnológica",
+      description: "Te asesoramos en la elección de la mejor tecnología y arquitectura para asegurar el éxito de tu proyecto."
+    },
+    {
+      icon: <Zap className="w-8 h-8 text-cyan-400" />,
+      title: "Corte y Grabado Láser",
+      description: "Cortes precisos y acabados profesionales en madera, acrílico y otros materiales para tus proyectos maker."
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-50 font-sans selection:bg-cyan-500 selection:text-white">
+      
+      {/* NAVEGACIÓN */}
+      <nav className="fixed w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-2 cursor-pointer">
+              <div className="bg-cyan-500 p-2 rounded-lg">
+                <Wrench className="w-6 h-6 text-slate-900" />
+              </div>
+              <span className="text-2xl font-bold tracking-wider">MAKER<span className="text-cyan-400">SAGO</span></span>
+            </div>
+
+            {/* Menú Desktop */}
+            <div className="hidden md:flex space-x-8">
+              <a href="#inicio" className="text-slate-300 hover:text-cyan-400 transition-colors">Inicio</a>
+              <a href="#servicios" className="text-slate-300 hover:text-cyan-400 transition-colors">Servicios</a>
+              <a href="#nosotros" className="text-slate-300 hover:text-cyan-400 transition-colors">Nosotros</a>
+              <a href="#contacto" className="text-slate-300 hover:text-cyan-400 transition-colors">Contacto</a>
+            </div>
+
+            {/* Botón CTA Desktop */}
+            <div className="hidden md:flex">
+              <a href="#contacto" className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold px-6 py-2 rounded-full transition-all transform hover:scale-105">
+                Cotizar Proyecto
+              </a>
+            </div>
+
+            {/* Menú Móvil (Hamburguesa) */}
+            <div className="md:hidden flex items-center">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-300 hover:text-white">
+                {isMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Dropdown Móvil */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-slate-800 border-b border-slate-700">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <a href="#inicio" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Inicio</a>
+              <a href="#servicios" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Servicios</a>
+              <a href="#nosotros" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Nosotros</a>
+              <a href="#contacto" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-slate-300 hover:text-cyan-400">Contacto</a>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* SECCIÓN HERO (Inicio) */}
+      <section id="inicio" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        {/* Elementos decorativos de fondo */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+            Transformamos tus ideas en <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Realidad Tangible</span>
+          </h1>
+          <p className="mt-4 text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto mb-10">
+            En Maker Sago combinamos ingeniería, desarrollo de software e impresión 3D para dar vida a tus proyectos más ambiciosos.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="#servicios" className="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-8 py-4 rounded-full flex items-center justify-center transition-all transform hover:scale-105">
+              Ver Nuestros Servicios
+              <ChevronRight className="ml-2 w-5 h-5" />
+            </a>
+            <a href="#contacto" className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold px-8 py-4 rounded-full flex items-center justify-center transition-all">
+              Hablemos de tu proyecto
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN SERVICIOS */}
+      <section id="servicios" className="py-20 bg-slate-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Lo que hacemos mejor</h2>
+            <div className="w-20 h-1 bg-cyan-500 mx-auto rounded-full mb-6"></div>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Soluciones integrales de hardware y software diseñadas para innovadores, emprendedores y empresas.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <div key={index} className="bg-slate-800 p-8 rounded-2xl border border-slate-700 hover:border-cyan-500/50 transition-colors group">
+                <div className="bg-slate-900 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  {service.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">{service.title}</h3>
+                <p className="text-slate-400 leading-relaxed">
+                  {service.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN NOSOTROS / BANNER */}
+      <section id="nosotros" className="py-20 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border border-cyan-500/20 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">El espíritu <span className="text-cyan-400">Maker</span> en nuestro ADN</h2>
+              <p className="text-slate-300 text-lg mb-6 leading-relaxed">
+                Somos un equipo de ingenieros, desarrolladores y creadores apasionados por la tecnología. En Maker Sago no solo diseñamos; construimos, programamos, soldamos y probamos hasta que tu producto funciona a la perfección.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center text-slate-300">
+                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
+                    <ChevronRight className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  Metodologías Ágiles de Desarrollo
+                </li>
+                <li className="flex items-center text-slate-300">
+                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
+                    <ChevronRight className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  Laboratorio propio de pruebas
+                </li>
+                <li className="flex items-center text-slate-300">
+                  <div className="bg-cyan-500/20 p-1 rounded-full mr-3">
+                    <ChevronRight className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  Atención personalizada
+                </li>
+              </ul>
+            </div>
+            <div className="flex-1 w-full relative">
+              {/* Espacio para una imagen representativa del taller/oficina */}
+              <div className="aspect-video bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700 overflow-hidden relative group">
+                <div className="absolute inset-0 bg-cyan-500/10 group-hover:bg-cyan-500/0 transition-colors z-10"></div>
+                {/* Puedes reemplazar este div con una etiqueta <img> cuando tengas fotos de Maker Sago */}
+                <div className="text-slate-500 flex flex-col items-center">
+                  <Cpu className="w-16 h-16 mb-2 opacity-50" />
+                  <span>[Imagen de Taller Maker Sago]</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN CONTACTO */}
+      <section id="contacto" className="py-20 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Inicia tu proyecto hoy</h2>
+            <div className="w-20 h-1 bg-cyan-500 mx-auto rounded-full mb-6"></div>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Déjanos un mensaje con tu idea o requerimiento y nos pondremos en contacto contigo a la brevedad.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Formulario */}
+            <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700">
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">Nombre Completo</label>
+                  <input type="text" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="Ej. Juan Pérez" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">Correo Electrónico</label>
+                  <input type="email" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="tucorreo@ejemplo.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">Cuéntanos sobre tu proyecto</label>
+                  <textarea rows="4" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" placeholder="Necesito una app web y carcasas en 3D para..."></textarea>
+                </div>
+                <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center">
+                  Enviar Mensaje
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </button>
+              </form>
+            </div>
+
+            {/* Info de contacto */}
+            <div className="flex flex-col justify-center space-y-8">
+              <div className="flex items-start">
+                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold mb-1">Email</h4>
+                  <p className="text-slate-400">contacto@makersago.com</p>
+                  <p className="text-sm text-slate-500 mt-1">Respondemos en menos de 24 horas.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold mb-1">Teléfono</h4>
+                  <p className="text-slate-400">+51 987 654 321</p>
+                  <p className="text-sm text-slate-500 mt-1">Lunes a Viernes, 9am - 6pm</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-slate-800 p-4 rounded-xl mr-6 text-cyan-400 border border-slate-700">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold mb-1">Laboratorio Maker</h4>
+                  <p className="text-slate-400">Av. Innovación 123, Edificio Tech<br/>Lima, Perú</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-slate-950 py-10 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center gap-2 mb-4 md:mb-0">
+            <Wrench className="w-5 h-5 text-cyan-500" />
+            <span className="text-xl font-bold tracking-wider text-slate-300">MAKER<span className="text-cyan-500">SAGO</span></span>
+          </div>
+          <p className="text-slate-500 text-sm text-center md:text-left">
+            &copy; {new Date().getFullYear()} Maker Sago. Todos los derechos reservados.
+          </p>
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            {/* Redes sociales placeholders */}
+            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">LinkedIn</a>
+            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">Instagram</a>
+            <a href="#" className="text-slate-500 hover:text-cyan-400 transition-colors">GitHub</a>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}
